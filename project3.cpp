@@ -182,17 +182,12 @@ void Camera::jump(){
     JUMPING = false;
 }
 
-// GLOBALS //
-
-Camera camera = Camera(120, 1, 0.1, 2000);
-
-// END GLOBALS //
 
 
 class Box
 {
 public:
-	Box(int x, int y, int z, int side_len, int id);
+	Box(int x, int y, int z, int side_len);
 	/*void setVertex(int i, Vertex v);
 	void setVertex(int i, float x, float y, float z);*/
 	int X();
@@ -204,14 +199,14 @@ public:
 	void setSideLen(int len);
 	int sideLen();
 	void draw();
-	int Id();
-	void setId(int id);
+	void remove(){ this->render = false; };
+	bool exists(){ this->render; };
 private:
-	int id;
 	int x;
 	int y;
 	int z;
 	int side_len;
+	bool render = true;
 	//vector<Vertex> vertices;
 };
 
@@ -225,13 +220,12 @@ void Box::setZ(int z) { this->z = z; }
 void Box::setSideLen(int len) { this->side_len = len; }
 
 
-Box::Box(int x, int y, int z, int side_len, int id) 
+Box::Box(int x, int y, int z, int side_len) 
 {
 	setX(x);
 	setY(y);
 	setZ(z);
 	setSideLen(side_len);
-	setId(id);
 }
 void Box::draw()
 {
@@ -285,8 +279,6 @@ void Box::draw()
 
 	glEnd();
 }
-int Box::Id() { return this->id; }
-void Box::setId(int i) { this->id = id; }
 
 void drawChar(int aChar, bool smallText = false) {
 	if (smallText) {
@@ -296,6 +288,14 @@ void drawChar(int aChar, bool smallText = false) {
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, aChar);
 	}
 }
+
+
+// GLOBALS //
+
+Camera camera = Camera(120, 1, 0.1, 2000);
+vector<vector<Box>> boxes;
+
+// END GLOBALS //
 
 void drawCoordinateSystem() {
 	glPointSize(1);		// change point size back to 1
@@ -317,6 +317,28 @@ void drawCoordinateSystem() {
 	drawChar('Z', true);
 }
 
+void initBoxes(){
+    int side = 5;
+    int box_len = 25;
+    int y = -100;
+    int z = 0;
+    for(int i=0; i < side; i++){
+        for(int j=0; j < side; j++){
+            boxes.at(i).at(j) = Box(y, 0, z, box_len);
+            y += box_len;
+        }
+        z += box_len;
+    }
+}
+
+void drawMasterBox(){
+    for(int i = 0; i < boxes.size(); i++){
+        for(int j = 0; j < boxes.at(i).size(); j++){
+            if(boxes.at(i).at(j).exists())
+                boxes.at(i).at(j).draw();
+        }
+    }
+}
 
 void myDisplayCallback()
 {
@@ -325,9 +347,9 @@ void myDisplayCallback()
 	drawCoordinateSystem();
 	/*glEnable(GL_POLYGON_STIPPLE);
 	glPolygonStipple(shield_pattern);*/
-	Box b1(0, 0, 0, 50, 0);
+	Box b1(0, 0, 0, 50);
 	b1.draw();
-	Box b(50, 0, 0, 50, 1);
+	Box b(50, 0, 0, 50);
 	b.draw();
 	/*glPushMatrix();
 	glTranslatef(50, 0, 0);
