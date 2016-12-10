@@ -73,7 +73,7 @@ class Camera{
         double orientX, orientY, orientZ;
 
         // PERSPECTIVE VALUES
-        double view_field, ratio, near, far;
+        double view_field, ratio, near_view, far_view;
 
         double movement;
 
@@ -92,14 +92,14 @@ class Camera{
             this->orientZ = 100;
             this->view_field = view;
             this->ratio = r;
-            this->near = n;
-            this->far = f;
+            this->near_view = n;
+            this->far_view = f;
             this->movement = 10;
         };
 
         void perspective(){
             glMatrixMode(GL_PROJECTION);
-            gluPerspective(this->view_field, this->ratio, this->near, this->far);
+            gluPerspective(this->view_field, this->ratio, this->near_view, this->far_view);
         };
 
         void lookAt(){
