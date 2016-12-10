@@ -50,6 +50,14 @@ double toDegrees(double radians){
     return radians * 180 / 3.14159;
 }
 
+void handleSleep(int time){
+        #ifdef WIN_32
+            Sleep(time);
+        #else
+            usleep(time);
+        #endif
+}
+
 class Camera{
     private:
         // ORIGIN OF CAMERA COORD
@@ -160,21 +168,13 @@ void Camera::jump(){
         this->directZ += 2;
         this->eyeZ += 2;
         this->move();
-        #ifdef WIN_32
-            Sleep(sleep_time);
-        #else
-            usleep(sleep_time);
-        #endif
+        handleSleep(sleep_time);
     }
     for(int i = jump_len; i > 0; i--){
         this->directZ -= 2;
         this->eyeZ -= 2;
         this->move();
-        #ifdef WIN_32
-            Sleep(sleep_time);
-        #else
-            usleep(sleep_time);
-        #endif
+        handleSleep(sleep_time);
     }
 
     JUMPING = false;
