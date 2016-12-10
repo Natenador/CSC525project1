@@ -51,7 +51,7 @@ double toDegrees(double radians){
 }
 
 void handleSleep(int time){
-        #ifdef WIN_32
+        #ifdef _WIN32
             Sleep(time);
         #else
             usleep(time);
@@ -380,11 +380,8 @@ void handleSpecial(int key, int mx, int my){
 //***********************************************************************************
 void myInit()
 {glClearColor(1, 1, 1, 0);			// specify a background color: white 
-//glOrtho(-500, 500, -500, 500, -500, 500);  // specify a viewing area
-//gluPerspective(100, 1, 0, 400);
 camera.perspective();
 glEnable(GL_DEPTH_TEST);
-//gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
 camera.lookAt();
 }
 
