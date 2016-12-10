@@ -23,52 +23,170 @@
 #include <cmath>
 #include<string>
 #include<iostream>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include<vector>
 #include <GL/glut.h>				// include GLUT library
 //***********************************************************************************
-
 using std::cout;
 using std::endl;
 using std::vector;
 using std::string;
+// SCREEN GLOBALS //
+const int WIDTH = 900;
+const int HEIGHT = 700;
+bool CONTROL = false;
+bool JUMPING = false;
 
-//class Vertex
-//{
-//public:
-//	Vertex();
-//	Vertex(float x, float y, float z);
-//	Vertex& operator=(Vertex& v);
-//	float X();
-//	float Y();
-//	float Z();
-//	void setX(float x);
-//	void setY(float y);
-//	void setZ(float z);
-//
-//private:
-//	float x;
-//	float y;
-//	float z;
-//};
-//Vertex::Vertex() {}
-//Vertex::Vertex(float x, float y, float z)
-//{
-//	setX(x);
-//	setY(y);
-//	setZ(z);
-//}
-//Vertex& Vertex::operator=(Vertex& v)
-//{
-//	setX(v.X());
-//	setY(v.Y());
-//	setZ(v.Z());
-//}
-//float Vertex::X() { return this->x; }
-//float Vertex::Y() { return this->y; }
-//float Vertex::Z() { return this->z; }
-//void Vertex::setX(float x) { this->x = x; }
-//void Vertex::setY(float y) { this->y = y; }
-//void Vertex::setZ(float z) { this->z = z; }
+void myDisplayCallback();
+
+double toRadians(double degrees) {
+	return degrees * 3.14159 / 180;
+}
+
+double toDegrees(double radians){
+    return radians * 180 / 3.14159;
+}
+
+void handleSleep(){
+        #ifdef _WIN32
+            Sleep(10);
+        #else
+            usleep(1000);
+        #endif
+}
+
+class Camera{
+    private:
+        // ORIGIN OF CAMERA COORD
+        double eyeX, eyeY, eyeZ;
+
+        // WHERE CAMERA LOOKS
+        double directX, directY, directZ;
+
+        // POINT ABOVE CAMERA
+        double orientX, orientY, orientZ;
+
+        // PERSPECTIVE VALUES
+        double view_field, ratio, near_view, far_view;
+
+        double movement;
+
+        void move();
+
+    public:
+        Camera(double view, double r, double n, double f){
+            this->eyeX = -600;
+            this->eyeY = 25;
+            this->eyeZ = 50;
+            this->directX = 0;
+            this->directY = 0;
+            this->directZ = 0;
+            this->orientX = 0;
+            this->orientY = 0;
+            this->orientZ = 100;
+            this->view_field = view;
+            this->ratio = r;
+            this->near_view = n;
+            this->far_view = f;
+            this->movement = 10;
+        };
+
+        void perspective(){
+            glMatrixMode(GL_PROJECTION);
+            gluPerspective(this->view_field, this->ratio, this->near_view, this->far_view);
+        };
+
+        void lookAt(){
+            glMatrixMode(GL_MODELVIEW);
+            gluLookAt(this->eyeX, this->eyeY, this->eyeZ,
+                    this->directX, this->directY, this->directZ,
+                    this->orientX, this->orientY, this->orientZ);
+        };
+        void debug(){
+            std::cout << "Camera Debug info: " << std::endl;
+            std::cout << "Eye coord: (" << this->eyeX << ", " << this->eyeY << ", " << this->eyeZ << ")" << std::endl;
+            std::cout << "direct coord: (" << this->directX << ", " << this->directY << ", " << this->directZ << ")" << std::endl;
+            std::cout << "orient coord: (" << this->orientX << ", " << this->orientY << ", " << this->orientZ << ")" << std::endl;
+        };
+
+        void right();
+        void left();
+        void forward();
+        void backward();
+        void mouseMove(int mx, int my);
+        void jump();
+};
+
+void Camera::move(){
+    glLoadIdentity();
+    this->lookAt();
+    //this->debug();
+    myDisplayCallback();
+};
+
+void Camera::right(){
+    this->eyeY -= this->movement;
+    this->directY -= this->movement;
+    this->move();
+};
+
+void Camera::left(){
+    this->eyeY += this->movement;
+    this->directY += this->movement;
+    this->move();
+};
+
+void Camera::forward(){
+    double wall_stop = 0;
+    if(this->eyeX+this->movement >= wall_stop)
+        return;
+    this->eyeX += this->movement;
+    this->directX += this->movement;
+    this->move();
+}
+
+void Camera::backward(){
+    this->eyeX -= this->movement;
+    this->directX -= this->movement;
+    this->move();
+}
+
+void Camera::mouseMove(int mx, int my){
+    this->directY = -((double)mx - (WIDTH/2));
+    this->directZ = (HEIGHT/2) - (double)my;
+    this->move();
+}
+
+void Camera::jump(){
+    JUMPING = true;
+    int jump_len = 40;
+    for(int i = 0; i < jump_len; i++){
+        this->directZ += 2;
+        this->eyeZ += 2;
+        this->move();
+        handleSleep();
+    }
+    for(int i = jump_len; i > 0; i--){
+        this->directZ -= 2;
+        this->eyeZ -= 2;
+        this->move();
+        handleSleep();
+    }
+
+    JUMPING = false;
+}
+
+// GLOBALS //
+
+Camera camera = Camera(120, 1, 0.1, 2000);
+
+// END GLOBALS //
 
 
 class Box
@@ -135,9 +253,9 @@ void Box::draw()
 	glVertex3i(x, y + side_len, z);
 	glColor3f(0, 1, 0);
 	glVertex3i(x, y + side_len, z + side_len);
-	glColor3f(1, .5, .25);
 	glVertex3i(x, y, z + side_len);
 	//far x-y parallel plane
+	glColor3f(1, .5, .25);
 	glVertex3i(x, y, z);
 	glVertex3i(x, y + side_len, z);
 	glVertex3i(x + side_len, y + side_len, z);
@@ -159,32 +277,16 @@ void Box::draw()
 	//far z-x parallel plane
 	glColor3f(1, .5, .25);
 	glVertex3i(x, y, z);
+	glVertex3i(x + side_len, y, z);
 	glColor3f(0, 1, 0);
 	glVertex3i(x, y, z + side_len);
 	glVertex3i(x + side_len, y, z + side_len);
-	glColor3f(1, .5, .25);
-	glVertex3i(x + side_len, y, z);
 
 
 	glEnd();
 }
 int Box::Id() { return this->id; }
 void Box::setId(int i) { this->id = id; }
-//void Box::setVertex(int i, Vertex v)
-//{
-//	if (i > 0 && i < 9)
-//	{
-//		vertices.at(i) = v;
-//	}
-//}
-//void Box::setVertex(int i, float x, float y, float z)
-//{
-//	Vertex v(x, y, z);
-//	if (i > 0 && i < 9)
-//	{
-//		vertices.at(i) = v;
-//	}
-//}
 
 void drawChar(int aChar, bool smallText = false) {
 	if (smallText) {
@@ -215,9 +317,6 @@ void drawCoordinateSystem() {
 	drawChar('Z', true);
 }
 
-float toRadians(float degrees) {
-	return degrees * 3.14159 / 180;
-}
 
 void myDisplayCallback()
 {
@@ -277,15 +376,66 @@ void rotateZ(float angle) {
 	myDisplayCallback();
 }
 
+void handleKeys(unsigned char key, int cur_x, int cur_y){
+    if(key == 27)
+        CONTROL = false;
+    if(!CONTROL || JUMPING)
+        return;
+
+    switch(key){
+        case 'd':
+            camera.right();
+            break;
+        case 'a':
+            camera.left();
+            break;
+        case 'w':
+            camera.forward();
+            break;
+        case 's':
+            camera.backward();
+            break;
+        case ' ':
+            camera.jump();
+            break;
+    }
+}
+
+void handleMouse(int curX, int curY){
+    if(!CONTROL)
+        return;
+    camera.mouseMove(curX, curY);
+}
+
+// MENU GLOBALS
+const int ACTIVATE = 1;
+const int EXIT = 2;
+
+void mainMenu(int id){
+    switch(id){
+        case ACTIVATE:
+            CONTROL = true;
+            break;
+        case EXIT:
+            exit(0);
+    }
+}
+
+void handleSpecial(int key, int mx, int my){
+    switch(key){
+        case GLUT_KEY_END:
+            CONTROL = false;
+            break;
+    }
+}
+
 
 //***********************************************************************************
 void myInit()
 {glClearColor(1, 1, 1, 0);			// specify a background color: white 
-glMatrixMode(GL_PROJECTION);
-glOrtho(-200, 200, -200, 200, -200, 200);  // specify a viewing area
+camera.perspective();
 glEnable(GL_DEPTH_TEST);
-glMatrixMode(GL_MODELVIEW);
-gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
+camera.lookAt();
 }
 
 //***********************************************************************************
@@ -301,12 +451,22 @@ int  main()
     char *argv[1] = {(char*)"Something"};
     glutInit(&argc, argv);
     //====================================================================//
-	glutInitDisplayMode(GLUT_DEPTH);
-	glutInitWindowSize(400, 400);				// specify a window size
- glutInitWindowPosition(100, 0);			// specify a window position
- glutCreateWindow("3D Stuff");	// create a titled window
+    glutInitDisplayMode(GLUT_DEPTH);
+    glutInitWindowSize(WIDTH, HEIGHT);				// specify a window size
+    glutInitWindowPosition(100, 0);			// specify a window position
+    glutCreateWindow("3D Stuff");	// create a titled window
 
- myInit();		
-glutDisplayFunc(myDisplayCallback);	// register a callback
- glutMainLoop();							// get into an infinite loop
+    myInit();
+
+    glutCreateMenu(mainMenu);
+    glutAddMenuEntry("Take Control", ACTIVATE);
+    glutAddMenuEntry("Exit", EXIT);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+
+    glutKeyboardFunc(handleKeys);
+    glutSpecialFunc(handleSpecial);
+    glutPassiveMotionFunc(handleMouse);
+
+    glutDisplayFunc(myDisplayCallback);	// register a callback
+    glutMainLoop();							// get into an infinite loop
 }
