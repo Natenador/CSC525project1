@@ -93,6 +93,8 @@ class Camera{
 
         void right();
         void left();
+        void forward();
+        void backward();
 };
 
 void Camera::move(){
@@ -113,6 +115,21 @@ void Camera::left(){
     this->directY += this->movement;
     this->move();
 };
+
+void Camera::forward(){
+    double wall_stop = 0;
+    if(this->eyeX+this->movement >= wall_stop)
+        return;
+    this->eyeX += this->movement;
+    this->directX += this->movement;
+    this->move();
+}
+
+void Camera::backward(){
+    this->eyeX -= this->movement;
+    this->directX -= this->movement;
+    this->move();
+}
 
 // GLOBALS //
 
@@ -264,6 +281,12 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
             break;
         case 'a':
             camera.left();
+            break;
+        case 'w':
+            camera.forward();
+            break;
+        case 's':
+            camera.backward();
             break;
     }
 }
