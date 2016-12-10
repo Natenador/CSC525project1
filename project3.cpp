@@ -53,11 +53,11 @@ double toDegrees(double radians){
     return radians * 180 / 3.14159;
 }
 
-void handleSleep(int time){
+void handleSleep(){
         #ifdef _WIN32
-            Sleep(time);
+            Sleep(10);
         #else
-            usleep(time);
+            usleep(1000);
         #endif
 }
 
@@ -166,18 +166,17 @@ void Camera::mouseMove(int mx, int my){
 void Camera::jump(){
     JUMPING = true;
     int jump_len = 40;
-    int sleep_time = 10;
     for(int i = 0; i < jump_len; i++){
         this->directZ += 2;
         this->eyeZ += 2;
         this->move();
-        handleSleep(sleep_time);
+        handleSleep();
     }
     for(int i = jump_len; i > 0; i--){
         this->directZ -= 2;
         this->eyeZ -= 2;
         this->move();
-        handleSleep(sleep_time);
+        handleSleep();
     }
 
     JUMPING = false;
