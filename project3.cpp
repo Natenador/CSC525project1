@@ -82,11 +82,11 @@ class Camera{
     public:
         Camera(double view, double r, double n, double f){
             this->eyeX = -600;
-            this->eyeY = 25;
+            this->eyeY = 0;
             this->eyeZ = 50;
-            this->directX = 0;
+            this->directX = this->eyeX+100;
             this->directY = 0;
-            this->directZ = 0;
+            this->directZ = this->eyeZ;;
             this->orientX = 0;
             this->orientY = 0;
             this->orientZ = 100;
@@ -96,6 +96,10 @@ class Camera{
             this->far_view = f;
             this->movement = 10;
         };
+
+        double lookX(){ return this->directX; };
+        double lookY(){ return this->directY; };
+        double lookZ(){ return this->directZ; };
 
         void perspective(){
             glMatrixMode(GL_PROJECTION);
@@ -182,7 +186,8 @@ void Camera::jump(){
     JUMPING = false;
 }
 
-
+// CAMERA GLOBAL
+Camera camera = Camera(120, 1, 0.1, 2000);
 
 class Box
 {
@@ -200,7 +205,8 @@ public:
 	int sideLen();
 	void draw();
 	void remove(){ this->render = false; };
-	bool exists(){ this->render; };
+	bool exists(){ return this->render; };
+	void checkAndRemove();
 private:
 	int x;
 	int y;
@@ -227,6 +233,13 @@ Box::Box(int x, int y, int z, int side_len)
 	setZ(z);
 	setSideLen(side_len);
 }
+
+void Box::checkAndRemove(){
+    if(this->y < camera.lookY() && (this->y+this->side_len) > camera.lookY() && this->z < camera.lookZ() && (this->z+this->side_len) > camera.lookZ()){
+        this->remove();
+    }
+}
+
 void Box::draw()
 {
 	glBegin(GL_POLYGON);
@@ -292,7 +305,6 @@ void drawChar(int aChar, bool smallText = false) {
 
 // GLOBALS //
 
-Camera camera = Camera(120, 1, 0.1, 2000);
 vector<vector<Box>> boxes;
 
 // END GLOBALS //
@@ -318,20 +330,26 @@ void drawCoordinateSystem() {
 }
 
 void initBoxes(){
-    int side = 5;
-    int box_len = 25;
-    int y = -100;
+    int width = 25;
+    int height = 15;
+    int box_len = 50;
+    int start_y = -(width*box_len/2);
+    int y = start_y;
     int z = 0;
-    for(int i=0; i < side; i++){
-        for(int j=0; j < side; j++){
-            boxes.at(i).at(j) = Box(y, 0, z, box_len);
+    for(int i=0; i < height; i++){
+        vector<Box> temp;
+        for(int j=0; j < width; j++){
+            temp.push_back(Box(0, y, z, box_len));
             y += box_len;
         }
+        boxes.push_back(temp);
         z += box_len;
+        y = start_y;
+        temp.clear();
     }
 }
 
-void drawMasterBox(){
+void drawMasterWall(){
     for(int i = 0; i < boxes.size(); i++){
         for(int j = 0; j < boxes.at(i).size(); j++){
             if(boxes.at(i).at(j).exists())
@@ -345,57 +363,9 @@ void myDisplayCallback()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
 	drawCoordinateSystem();
-	/*glEnable(GL_POLYGON_STIPPLE);
-	glPolygonStipple(shield_pattern);*/
-	Box b1(0, 0, 0, 50);
-	b1.draw();
-	Box b(50, 0, 0, 50);
-	b.draw();
-	/*glPushMatrix();
-	glTranslatef(50, 0, 0);
-	glutSolidCube(50);*/
-	/*glPopMatrix();*/
+    drawMasterWall();
 
 	glFlush(); // flush out the buffer contents
-}
-
-void rotateX(float angle) {
-	float radians = toRadians(angle);
-	GLdouble matrix[] =
-	{
-		1, 0, 0, 0,
-		0, cos(radians), sin(radians), 0,
-		0, -sin(radians), cos(radians), 0,
-		0, 0, 0, 1
-	};
-	glMultMatrixd(matrix);
-	myDisplayCallback();
-}
-
-void rotateY(float angle) {
-	float radians = toRadians(angle);
-	GLdouble matrix[] =
-	{
-		cos(radians), 0, -sin(radians), 0,
-		0, 1, 0, 0,
-		sin(radians), 0, cos(radians), 0,
-		0, 0, 0, 1
-	};
-	glMultMatrixd(matrix);
-	myDisplayCallback();
-}
-
-void rotateZ(float angle) {
-	float radians = toRadians(angle);
-	GLdouble matrix[] =
-	{
-		cos(radians), sin(radians), 0, 0,
-		-sin(radians), cos(radians), 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	};
-	glMultMatrixd(matrix);
-	myDisplayCallback();
 }
 
 void handleKeys(unsigned char key, int cur_x, int cur_y){
@@ -427,6 +397,21 @@ void handleMouse(int curX, int curY){
     if(!CONTROL)
         return;
     camera.mouseMove(curX, curY);
+}
+
+void handleClick(int button, int state, int mx, int my){
+    int x = (mx - (WIDTH/2));
+    int y = (HEIGHT/2) - my;
+    if(button == GLUT_LEFT_BUTTON){
+    std::cout << "click" << std::endl;
+        for(int i = 0; i < boxes.size(); i++){
+            for(int j = 0; j < boxes.at(i).size(); j++){
+                if(boxes.at(i).at(j).exists())
+                    boxes.at(i).at(j).checkAndRemove();
+            }
+        }
+        myDisplayCallback();
+    }
 }
 
 // MENU GLOBALS
@@ -488,7 +473,9 @@ int  main()
     glutKeyboardFunc(handleKeys);
     glutSpecialFunc(handleSpecial);
     glutPassiveMotionFunc(handleMouse);
+    glutMouseFunc(handleClick);
 
+    initBoxes();
     glutDisplayFunc(myDisplayCallback);	// register a callback
     glutMainLoop();							// get into an infinite loop
 }
