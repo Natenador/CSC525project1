@@ -25,9 +25,12 @@
 #include<iostream>
 #include <GL/glut.h>				// include GLUT library
 //***********************************************************************************
-
+void myDisplayCallback();
 //gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
 //gluPerspective(100, 1, 0, 400);
+double toRadians(double degrees) {
+	return degrees * 3.14159 / 180;
+}
 
 class Camera{
     private:
@@ -42,6 +45,11 @@ class Camera{
 
         // PERSPECTIVE VALUES
         double view_field, ratio, near, far;
+
+        double movement;
+
+        void moveSide(double dx, double dy);
+
     public:
         Camera(double view, double r, double n, double f){
             this->eyeX = -200;
@@ -52,11 +60,12 @@ class Camera{
             this->directZ = 0;
             this->orientX = 0;
             this->orientY = 0;
-            this->orientZ = 1;
+            this->orientZ = 100;
             this->view_field = view;
             this->ratio = r;
             this->near = n;
             this->far = f;
+            this->movement = 10;
         };
 
         void perspective(){
@@ -70,8 +79,35 @@ class Camera{
                     this->directX, this->directY, this->directZ,
                     this->orientX, this->orientY, this->orientZ);
         };
+        void debug(){
+            std::cout << "Camera Debug info: " << std::endl;
+            std::cout << "Eye coord: (" << this->eyeX << ", " << this->eyeY << ", " << this->eyeZ << ")" << std::endl;
+            std::cout << "direct coord: (" << this->directX << ", " << this->directY << ", " << this->directZ << ")" << std::endl;
+            std::cout << "orient coord: (" << this->orientX << ", " << this->orientY << ", " << this->orientZ << ")" << std::endl;
+        };
+
+        void right();
+        void left();
 };
 
+void Camera::moveSide(double dx, double dy){
+    this->eyeX += dx;
+    this->eyeY += dy;
+    glLoadIdentity();
+    this->lookAt();
+    this->debug();
+    myDisplayCallback();
+};
+
+void Camera::right(){
+    double angle = toRadians(45);
+    this->moveSide(-(this->movement * cos(angle)), (this->movement * sin(angle)));
+};
+
+void Camera::left(){
+    double angle = toRadians(45);
+    this->moveSide((this->movement * cos(angle)), -(this->movement * sin(angle)));
+};
 
 // GLOBALS //
 
@@ -166,9 +202,6 @@ void drawCoordinateSystem() {
 	drawChar('Z', true);
 }
 
-float toRadians(float degrees) {
-	return degrees * 3.14159 / 180;
-}
 
 void myDisplayCallback()
 {
@@ -219,6 +252,17 @@ void rotateZ(float angle) {
 	myDisplayCallback();
 }
 
+void handleKeys(unsigned char key, int cur_x, int cur_y){
+    switch(key){
+        case 'd':
+            camera.right();
+            break;
+        case 'a':
+            camera.left();
+            break;
+    }
+}
+
 
 //***********************************************************************************
 void myInit()
@@ -244,12 +288,15 @@ int  main()
     char *argv[1] = {(char*)"Something"};
     glutInit(&argc, argv);
     //====================================================================//
-	glutInitDisplayMode(GLUT_DEPTH);
-	glutInitWindowSize(700, 600);				// specify a window size
- glutInitWindowPosition(100, 0);			// specify a window position
- glutCreateWindow("3D Stuff");	// create a titled window
+    glutInitDisplayMode(GLUT_DEPTH);
+    glutInitWindowSize(700, 600);				// specify a window size
+    glutInitWindowPosition(100, 0);			// specify a window position
+    glutCreateWindow("3D Stuff");	// create a titled window
 
- myInit();		
-glutDisplayFunc(myDisplayCallback);	// register a callback
- glutMainLoop();							// get into an infinite loop
+    myInit();
+
+    glutKeyboardFunc(handleKeys);
+
+    glutDisplayFunc(myDisplayCallback);	// register a callback
+    glutMainLoop();							// get into an infinite loop
 }
