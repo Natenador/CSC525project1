@@ -23,8 +23,21 @@
 #include <cmath>
 #include<string>
 #include<iostream>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include <GL/glut.h>				// include GLUT library
 //***********************************************************************************
+// SCREEN GLOBALS //
+const int WIDTH = 900;
+const int HEIGHT = 700;
+bool CONTROL = false;
+bool JUMPING = false;
+
 void myDisplayCallback();
 //gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
 //gluPerspective(100, 1, 0, 400);
@@ -57,7 +70,7 @@ class Camera{
 
     public:
         Camera(double view, double r, double n, double f){
-            this->eyeX = -200;
+            this->eyeX = -600;
             this->eyeY = 25;
             this->eyeZ = 50;
             this->directX = 0;
@@ -95,12 +108,14 @@ class Camera{
         void left();
         void forward();
         void backward();
+        void mouseMove(int mx, int my);
+        void jump();
 };
 
 void Camera::move(){
     glLoadIdentity();
     this->lookAt();
-    this->debug();
+    //this->debug();
     myDisplayCallback();
 };
 
@@ -131,9 +146,43 @@ void Camera::backward(){
     this->move();
 }
 
+void Camera::mouseMove(int mx, int my){
+    this->directY = -((double)mx - (WIDTH/2));
+    this->directZ = (HEIGHT/2) - (double)my;
+    this->move();
+}
+
+void Camera::jump(){
+    JUMPING = true;
+    int jump_len = 40;
+    int sleep_time = 1000;
+    for(int i = 0; i < jump_len; i++){
+        this->directZ += 2;
+        this->eyeZ += 2;
+        this->move();
+        #ifdef WIN_32
+            Sleep(sleep_time);
+        #else
+            usleep(sleep_time);
+        #endif
+    }
+    for(int i = jump_len; i > 0; i--){
+        this->directZ -= 2;
+        this->eyeZ -= 2;
+        this->move();
+        #ifdef WIN_32
+            Sleep(sleep_time);
+        #else
+            usleep(sleep_time);
+        #endif
+    }
+
+    JUMPING = false;
+}
+
 // GLOBALS //
 
-Camera camera = Camera(120, 1, 0.1, 500);
+Camera camera = Camera(120, 1, 0.1, 2000);
 
 // END GLOBALS //
 
@@ -275,6 +324,11 @@ void rotateZ(float angle) {
 }
 
 void handleKeys(unsigned char key, int cur_x, int cur_y){
+    if(key == 27)
+        CONTROL = false;
+    if(!CONTROL || JUMPING)
+        return;
+
     switch(key){
         case 'd':
             camera.right();
@@ -287,6 +341,37 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
             break;
         case 's':
             camera.backward();
+            break;
+        case ' ':
+            camera.jump();
+            break;
+    }
+}
+
+void handleMouse(int curX, int curY){
+    if(!CONTROL)
+        return;
+    camera.mouseMove(curX, curY);
+}
+
+// MENU GLOBALS
+const int ACTIVATE = 1;
+const int EXIT = 2;
+
+void mainMenu(int id){
+    switch(id){
+        case ACTIVATE:
+            CONTROL = true;
+            break;
+        case EXIT:
+            exit(0);
+    }
+}
+
+void handleSpecial(int key, int mx, int my){
+    switch(key){
+        case GLUT_KEY_END:
+            CONTROL = false;
             break;
     }
 }
@@ -317,13 +402,20 @@ int  main()
     glutInit(&argc, argv);
     //====================================================================//
     glutInitDisplayMode(GLUT_DEPTH);
-    glutInitWindowSize(700, 600);				// specify a window size
+    glutInitWindowSize(WIDTH, HEIGHT);				// specify a window size
     glutInitWindowPosition(100, 0);			// specify a window position
     glutCreateWindow("3D Stuff");	// create a titled window
 
     myInit();
 
+    glutCreateMenu(mainMenu);
+    glutAddMenuEntry("Take Control", ACTIVATE);
+    glutAddMenuEntry("Exit", EXIT);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+
     glutKeyboardFunc(handleKeys);
+    glutSpecialFunc(handleSpecial);
+    glutPassiveMotionFunc(handleMouse);
 
     glutDisplayFunc(myDisplayCallback);	// register a callback
     glutMainLoop();							// get into an infinite loop
