@@ -135,7 +135,7 @@ void Camera::backward(){
 
 // GLOBALS //
 
-Camera camera = Camera(120, 1, 0.1, 2000);
+Camera camera = Camera(120, 1, 0.1, 2100);
 GLfloat background[1200][1920][3];
 // END GLOBALS //
 
@@ -236,7 +236,7 @@ void myDisplayCallback()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
-	glRasterPos3i(background_x_pos, 2000, -2000);
+	glRasterPos3i(background_x_pos, 2100, -2000);
 	glDrawPixels(1920, 1200, GL_RGB, GL_FLOAT, background);
 	drawCoordinateSystem();
 	drawPolygons();
@@ -373,8 +373,8 @@ int  main()
     //====================================================================//
 	readPixelMap();
     glutInitDisplayMode(GLUT_DEPTH);
-    glutInitWindowSize(1920, 1200);				// specify a window size
-    glutInitWindowPosition(100, 0);			// specify a window position
+    glutInitWindowSize(1800, 1200);				// specify a window size
+    glutInitWindowPosition(0, 0);			// specify a window position
     glutCreateWindow("3D Stuff");	// create a titled window
 
     myInit();
