@@ -23,6 +23,10 @@
 #include <cmath>
 #include<string>
 #include<iostream>
+#include<fstream>
+#include<vector>
+#include <GL/glut.h>				// include GLUT library
+//***********************************************************************************
 
 #ifdef _WIN32
 #include <windows.h>
@@ -30,16 +34,14 @@
 #include <unistd.h>
 #endif
 
-#include<vector>
-#include <GL/glut.h>				// include GLUT library
 //***********************************************************************************
 using std::cout;
 using std::endl;
 using std::vector;
 using std::string;
 // SCREEN GLOBALS //
-const int WIDTH = 900;
-const int HEIGHT = 700;
+const int WIDTH = 1800;
+const int HEIGHT = 1200;
 bool CONTROL = false;
 bool JUMPING = false;
 
@@ -81,8 +83,8 @@ class Camera{
 
     public:
         Camera(double view, double r, double n, double f){
-            this->eyeX = -600;
-            this->eyeY = 0;
+            this->eyeX = -1000;
+            this->eyeY = 25;
             this->eyeZ = 50;
             this->directX = this->eyeX+100;
             this->directY = 0;
@@ -187,8 +189,18 @@ void Camera::jump(){
     JUMPING = false;
 }
 
-// CAMERA GLOBAL
-Camera camera = Camera(120, 1, 0.1, 2000);
+void green() {
+	glColor3f(0, .6, 0);
+}
+
+void brown() {
+	glColor3f(.7, .5, .3);
+}
+
+// GLOBALS //
+
+Camera camera = Camera(120, 1, 0.1, 2100);
+// END GLOBALS //
 
 class Box
 {
@@ -226,7 +238,6 @@ void Box::setY(int y) { this->y = y; }
 void Box::setZ(int z) { this->z = z; }
 void Box::setSideLen(int len) { this->side_len = len; }
 
-
 Box::Box(int x, int y, int z, int side_len) 
 {
 	setX(x);
@@ -245,37 +256,37 @@ void Box::draw()
 {
 	glBegin(GL_POLYGON);
 	//top z-x parallel plane
-	glColor3f(0, 1, 0);
+	green();
 	glVertex3i(x, y + side_len, z + side_len);
-	glColor3f(1, .5, .25);
+	brown();
 	glVertex3i(x, y + side_len, z);
 	glVertex3i(x + side_len, y + side_len, z);
 
-	glColor3f(0, 1, 0);
+	green();
 	glVertex3i(x + side_len, y + side_len, z + side_len);
 
 
-	glColor3f(1, .5, .25);
+	brown();
 	//far z-y parallel plane
 	glVertex3i(x, y, z);
 	glVertex3i(x, y + side_len, z);
-	glColor3f(0, 1, 0);
+	green();
 	glVertex3i(x, y + side_len, z + side_len);
 	glVertex3i(x, y, z + side_len);
 	//far x-y parallel plane
-	glColor3f(1, .5, .25);
+	brown();
 	glVertex3i(x, y, z);
 	glVertex3i(x, y + side_len, z);
 	glVertex3i(x + side_len, y + side_len, z);
 	glVertex3i(x + side_len, y, z);
 	//near z-y parallel plane
 
-	glColor3f(0, 1, 0);
+	green();
 	glVertex3i(x + side_len, y, z + side_len);
-	glColor3f(1, .5, .25);
+	brown();
 	glVertex3i(x + side_len, y + side_len, z);
 	glVertex3i(x + side_len, y, z);
-	glColor3f(0, 1, 0);
+	green();
 	glVertex3i(x + side_len, y + side_len, z + side_len);
 	//near x-y paralled plane
 	glVertex3i(x + side_len, y, z + side_len);
@@ -283,16 +294,21 @@ void Box::draw()
 	glVertex3i(x, y + side_len, z + side_len);
 	glVertex3i(x + side_len, y + side_len, z + side_len);
 	//far z-x parallel plane
-	glColor3f(1, .5, .25);
+	brown();
 	glVertex3i(x, y, z);
 	glVertex3i(x + side_len, y, z);
-	glColor3f(0, 1, 0);
+	green();
 	glVertex3i(x, y, z + side_len);
 	glVertex3i(x + side_len, y, z + side_len);
 
 
 	glEnd();
 }
+
+
+GLfloat background[1200][1920][3];
+int background_x_pos = 200;
+vector<vector<Box>> boxes;
 
 void drawChar(int aChar, bool smallText = false) {
 	if (smallText) {
@@ -304,11 +320,9 @@ void drawChar(int aChar, bool smallText = false) {
 }
 
 
-// GLOBALS //
-
-vector<vector<Box>> boxes;
-
-// END GLOBALS //
+void draw3dChar(int aChar) {
+	glutStrokeCharacter(GLUT_STROKE_ROMAN, aChar);
+}
 
 void drawCoordinateSystem() {
 	glPointSize(1);		// change point size back to 1
@@ -331,8 +345,8 @@ void drawCoordinateSystem() {
 }
 
 void initBoxes(){
-    int width = 25;
-    int height = 15;
+    int width = 40;
+    int height = 10;
     int box_len = 50;
     int start_y = -(width*box_len/2);
     int y = start_y;
@@ -378,11 +392,58 @@ void myDisplayCallback()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
+	//glRasterPos3i(500, 2100, -2000);
+	//glDrawPixels(1920, 1200, GL_RGB, GL_FLOAT, background);
 	drawCoordinateSystem();
     drawMasterWall();
     drawAimDot();
+	glPushMatrix();
+	glTranslatef(0, 1, 0);
+	glRotatef(-90, 0, 1, 0);
+	glRotatef(-90, 0, 0, 1);
+	glTranslated(-900, 0, 0);
+	glTranslated(0, 0, -100);
+	std::string message = "Minecraft? Hell Yes! Buy it!";
+	for (int i = 0; i < message.size(); i++) {
+		draw3dChar(message[i]);
+	}
+	glPopMatrix();
 
 	glFlush(); // flush out the buffer contents
+}
+
+void readPixelMap(){
+    std::string fname;
+    // TODO:  REMOVE THIS WHEN WE TURN IN THE PROJECT.
+    // replace with correct path to execute on Trace.
+#ifdef _WIN32
+    fname = "C:\\src\\Git_Repos\\CSC525project3\\CSC525project3\\pixel_map_minecraft.txt";
+#else
+    fname = "pixel_map.txt";
+#endif
+    std::fstream fin;
+    fin.open(fname);
+    float r, g, b;
+    int y = 0;
+    int x = 0;
+    if(fin.is_open()){
+		std::cout << "Successfully opened the file. \nNow reading from pixel_map_minecraft.bin may take a few seconds." << std::endl;
+        while(fin >> r){
+            fin >> g;
+            fin >> b;
+            background[y][x][0] = r;
+            background[y][x][1] = g;
+            background[y][x][2] = b;
+            x++;
+            if(x == 1920){
+                x = 0;
+                y++;
+            }
+        }
+    }
+    else
+        std::cout << fname << " was unable to be opened" << std::endl;
+    fin.close();
 }
 
 void handleKeys(unsigned char key, int cur_x, int cur_y){
@@ -400,9 +461,11 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
             break;
         case 'w':
             camera.forward();
+			background_x_pos += 10;
             break;
         case 's':
             camera.backward();
+			background_x_pos -= 10;
             break;
         case ' ':
             camera.jump();
@@ -455,7 +518,7 @@ void handleSpecial(int key, int mx, int my){
 
 //***********************************************************************************
 void myInit()
-{glClearColor(1, 1, 1, 0);			// specify a background color: white 
+{glClearColor(.3, .3, .3, 0);			// specify a background color: white 
 camera.perspective();
 glEnable(GL_DEPTH_TEST);
 camera.lookAt();
@@ -474,9 +537,10 @@ int  main()
     char *argv[1] = {(char*)"Something"};
     glutInit(&argc, argv);
     //====================================================================//
+	//readPixelMap();
     glutInitDisplayMode(GLUT_DEPTH);
     glutInitWindowSize(WIDTH, HEIGHT);				// specify a window size
-    glutInitWindowPosition(100, 0);			// specify a window position
+    glutInitWindowPosition(0, 0);			// specify a window position
     glutCreateWindow("3D Stuff");	// create a titled window
 
     myInit();
