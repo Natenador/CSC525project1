@@ -26,6 +26,59 @@
 #include <GL/glut.h>				// include GLUT library
 //***********************************************************************************
 
+//gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
+//gluPerspective(100, 1, 0, 400);
+
+class Camera{
+    private:
+        // ORIGIN OF CAMERA COORD
+        double eyeX, eyeY, eyeZ;
+
+        // WHERE CAMERA LOOKS
+        double directX, directY, directZ;
+
+        // POINT ABOVE CAMERA
+        double orientX, orientY, orientZ;
+
+        // PERSPECTIVE VALUES
+        double view_field, ratio, near, far;
+    public:
+        Camera(double view, double r, double n, double f){
+            this->eyeX = -200;
+            this->eyeY = 25;
+            this->eyeZ = 50;
+            this->directX = 0;
+            this->directY = 0;
+            this->directZ = 0;
+            this->orientX = 0;
+            this->orientY = 0;
+            this->orientZ = 1;
+            this->view_field = view;
+            this->ratio = r;
+            this->near = n;
+            this->far = f;
+        };
+
+        void perspective(){
+            glMatrixMode(GL_PROJECTION);
+            gluPerspective(this->view_field, this->ratio, this->near, this->far);
+        };
+
+        void lookAt(){
+            glMatrixMode(GL_MODELVIEW);
+            gluLookAt(this->eyeX, this->eyeY, this->eyeZ,
+                    this->directX, this->directY, this->directZ,
+                    this->orientX, this->orientY, this->orientZ);
+        };
+};
+
+
+// GLOBALS //
+
+Camera camera = Camera(120, 1, 0.1, 500);
+
+// END GLOBALS //
+
 GLdouble vertex[6][3] = 
 {
 	{ 60, 55, 40 },
@@ -170,11 +223,12 @@ void rotateZ(float angle) {
 //***********************************************************************************
 void myInit()
 {glClearColor(1, 1, 1, 0);			// specify a background color: white 
-glMatrixMode(GL_PROJECTION);
-glOrtho(-200, 200, -200, 200, -200, 200);  // specify a viewing area
+//glOrtho(-500, 500, -500, 500, -500, 500);  // specify a viewing area
+//gluPerspective(100, 1, 0, 400);
+camera.perspective();
 glEnable(GL_DEPTH_TEST);
-glMatrixMode(GL_MODELVIEW);
-gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
+//gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
+camera.lookAt();
 }
 
 //***********************************************************************************
@@ -191,7 +245,7 @@ int  main()
     glutInit(&argc, argv);
     //====================================================================//
 	glutInitDisplayMode(GLUT_DEPTH);
-	glutInitWindowSize(400, 400);				// specify a window size
+	glutInitWindowSize(700, 600);				// specify a window size
  glutInitWindowPosition(100, 0);			// specify a window position
  glutCreateWindow("3D Stuff");	// create a titled window
 
