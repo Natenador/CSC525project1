@@ -24,12 +24,28 @@
 #include<string>
 #include<iostream>
 #include<fstream>
+#include<vector>
 #include <GL/glut.h>				// include GLUT library
 //***********************************************************************************
-int background_x_pos = 200;
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+//***********************************************************************************
+using std::cout;
+using std::endl;
+using std::vector;
+using std::string;
+// SCREEN GLOBALS //
+const int WIDTH = 1800;
+const int HEIGHT = 1200;
+bool CONTROL = false;
+bool JUMPING = false;
+
 void myDisplayCallback();
-//gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
-//gluPerspective(100, 1, 0, 400);
 
 double toRadians(double degrees) {
 	return degrees * 3.14159 / 180;
@@ -37,6 +53,14 @@ double toRadians(double degrees) {
 
 double toDegrees(double radians){
     return radians * 180 / 3.14159;
+}
+
+void handleSleep(){
+        #ifdef _WIN32
+            Sleep(10);
+        #else
+            usleep(1000);
+        #endif
 }
 
 class Camera{
@@ -51,7 +75,7 @@ class Camera{
         double orientX, orientY, orientZ;
 
         // PERSPECTIVE VALUES
-        double view_field, ratio, near, far;
+        double view_field, ratio, near_view, far_view;
 
         double movement;
 
@@ -70,14 +94,14 @@ class Camera{
             this->orientZ = 100;
             this->view_field = view;
             this->ratio = r;
-            this->near = n;
-            this->far = f;
+            this->near_view = n;
+            this->far_view = f;
             this->movement = 10;
         };
 
         void perspective(){
             glMatrixMode(GL_PROJECTION);
-            gluPerspective(this->view_field, this->ratio, this->near, this->far);
+            gluPerspective(this->view_field, this->ratio, this->near_view, this->far_view);
         };
 
         void lookAt(){
@@ -97,6 +121,8 @@ class Camera{
         void left();
         void forward();
         void backward();
+        void mouseMove(int mx, int my);
+        void jump();
 };
 
 void Camera::move(){
@@ -133,22 +159,142 @@ void Camera::backward(){
     this->move();
 }
 
-// GLOBALS //
+void Camera::mouseMove(int mx, int my){
+    this->directY = -((double)mx - (WIDTH/2));
+    this->directZ = (HEIGHT/2) - (double)my;
+    this->move();
+}
 
+void Camera::jump(){
+    JUMPING = true;
+    int jump_len = 40;
+    for(int i = 0; i < jump_len; i++){
+        this->directZ += 2;
+        this->eyeZ += 2;
+        this->move();
+        handleSleep();
+    }
+    for(int i = jump_len; i > 0; i--){
+        this->directZ -= 2;
+        this->eyeZ -= 2;
+        this->move();
+        handleSleep();
+    }
+
+    JUMPING = false;
+}
+
+// GLOBALS //
 Camera camera = Camera(120, 1, 0.1, 2100);
 GLfloat background[1200][1920][3];
+int background_x_pos = 200;
 // END GLOBALS //
 
-GLdouble vertex[6][3] = 
+void green() {
+	glColor3f(0, .6, 0);
+}
+
+void brown() {
+	glColor3f(.7, .5, .3);
+}
+
+class Box
 {
-	{ 60, 55, 40 },
-	{ 60, -50, 40},
-	{ 65, 90, -70},
-	{ 65, 0, -70 },
-	{ -70, 70, 20},
-	{ -70, -20, 20}
+public:
+	Box(int x, int y, int z, int side_len, int id);
+	/*void setVertex(int i, Vertex v);
+	void setVertex(int i, float x, float y, float z);*/
+	int X();
+	int Y();
+	int Z();
+	void setX(int x);
+	void setY(int y);
+	void setZ(int z);
+	void setSideLen(int len);
+	int sideLen();
+	void draw();
+	int Id();
+	void setId(int id);
+private:
+	int id;
+	int x;
+	int y;
+	int z;
+	int side_len;
+	//vector<Vertex> vertices;
 };
 
+int Box::X() { return this->x; }
+int Box::Y() { return this->y; }
+int Box::Z() { return this->z; }
+int Box::sideLen() { return this->side_len; }
+void Box::setX(int x) { this->x = x; }
+void Box::setY(int y) { this->y = y; }
+void Box::setZ(int z) { this->z = z; }
+void Box::setSideLen(int len) { this->side_len = len; }
+
+Box::Box(int x, int y, int z, int side_len, int id) 
+{
+	setX(x);
+	setY(y);
+	setZ(z);
+	setSideLen(side_len);
+	setId(id);
+}
+void Box::draw()
+{
+	glBegin(GL_POLYGON);
+	//top z-x parallel plane
+	green();
+	glVertex3i(x, y + side_len, z + side_len);
+	brown();
+	glVertex3i(x, y + side_len, z);
+	glVertex3i(x + side_len, y + side_len, z);
+
+	green();
+	glVertex3i(x + side_len, y + side_len, z + side_len);
+
+
+	brown();
+	//far z-y parallel plane
+	glVertex3i(x, y, z);
+	glVertex3i(x, y + side_len, z);
+	green();
+	glVertex3i(x, y + side_len, z + side_len);
+	glVertex3i(x, y, z + side_len);
+	//far x-y parallel plane
+	brown();
+	glVertex3i(x, y, z);
+	glVertex3i(x, y + side_len, z);
+	glVertex3i(x + side_len, y + side_len, z);
+	glVertex3i(x + side_len, y, z);
+	//near z-y parallel plane
+
+	green();
+	glVertex3i(x + side_len, y, z + side_len);
+	brown();
+	glVertex3i(x + side_len, y + side_len, z);
+	glVertex3i(x + side_len, y, z);
+	green();
+	glVertex3i(x + side_len, y + side_len, z + side_len);
+	//near x-y paralled plane
+	glVertex3i(x + side_len, y, z + side_len);
+	glVertex3i(x, y, z + side_len);
+	glVertex3i(x, y + side_len, z + side_len);
+	glVertex3i(x + side_len, y + side_len, z + side_len);
+	//far z-x parallel plane
+	brown();
+	glVertex3i(x, y, z);
+	glVertex3i(x + side_len, y, z);
+	green();
+	glVertex3i(x, y, z + side_len);
+	glVertex3i(x + side_len, y, z + side_len);
+
+
+	glEnd();
+}
+int Box::Id() { return this->id; }
+void Box::setId(int i) { this->id = id; }
 
 void drawChar(int aChar, bool smallText = false) {
 	if (smallText) {
@@ -162,54 +308,6 @@ void drawChar(int aChar, bool smallText = false) {
 void draw3dChar(int aChar) {
 	glutStrokeCharacter(GLUT_STROKE_ROMAN, aChar);
 }
-
-void drawRed() {
-	glPolygonMode(GL_BACK, GL_LINE);
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glFrontFace(GL_CCW);
-	glBegin(GL_POLYGON);
-	glColor3f(1, 0, 0);
-	glVertex3dv(vertex[0]);
-	glVertex3dv(vertex[1]);
-	glVertex3dv(vertex[3]);
-	glVertex3dv(vertex[2]);
-	glEnd();
-}
-
-void drawBlue() {
-	glPolygonMode(GL_BACK, GL_LINE);
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glFrontFace(GL_CCW);
-	glBegin(GL_POLYGON);
-	glColor3f(0, 0, 1);
-	glVertex3dv(vertex[0]);
-	glVertex3dv(vertex[4]);
-	glVertex3dv(vertex[5]);
-	glVertex3dv(vertex[1]);
-	glEnd();
-}
-
-void drawGreen() {
-	glPolygonMode(GL_BACK, GL_LINE);
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glFrontFace(GL_CW);
-	glBegin(GL_POLYGON);
-	glColor3f(0, 1, 0);
-	glVertex3dv(vertex[2]);
-	glVertex3dv(vertex[4]);
-	glVertex3dv(vertex[5]);
-	glVertex3dv(vertex[3]);
-	glEnd();
-
-}
-void drawPolygons() 
-{
-	drawRed();
-	drawGreen();
-	drawBlue();
-
-}
-
 
 void drawCoordinateSystem() {
 	glPointSize(1);		// change point size back to 1
@@ -231,15 +329,13 @@ void drawCoordinateSystem() {
 	drawChar('Z', true);
 }
 
-
 void myDisplayCallback()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
-	glRasterPos3i(background_x_pos, 2100, -2000);
-	glDrawPixels(1920, 1200, GL_RGB, GL_FLOAT, background);
+	//glRasterPos3i(500, 2100, -2000);
+	//glDrawPixels(1920, 1200, GL_RGB, GL_FLOAT, background);
 	drawCoordinateSystem();
-	drawPolygons();
 	glPushMatrix();
 	glTranslatef(0, 1, 0);
 	glRotatef(-90, 0, 1, 0);
@@ -250,6 +346,10 @@ void myDisplayCallback()
 		draw3dChar(message[i]);
 	}
 	glPopMatrix();
+	Box b1(0, 0, 0, 50, 0);
+	b1.draw();
+	Box b(50, 0, 0, 50, 1);
+	b.draw();
 
 	glFlush(); // flush out the buffer contents
 }
@@ -259,7 +359,7 @@ void readPixelMap(){
     // TODO:  REMOVE THIS WHEN WE TURN IN THE PROJECT.
     // replace with correct path to execute on Trace.
 #ifdef _WIN32
-    fname = "C:\\TEMP\\pixel_map_minecraft.txt";
+    fname = "C:\\src\\Git_Repos\\CSC525project3\\CSC525project3\\pixel_map_minecraft.txt";
 #else
     fname = "pixel_map.txt";
 #endif
@@ -288,46 +388,12 @@ void readPixelMap(){
     fin.close();
 }
 
-void rotateX(float angle) {
-	float radians = toRadians(angle);
-	GLdouble matrix[] =
-	{
-		1, 0, 0, 0,
-		0, cos(radians), sin(radians), 0,
-		0, -sin(radians), cos(radians), 0,
-		0, 0, 0, 1
-	};
-	glMultMatrixd(matrix);
-	myDisplayCallback();
-}
-
-void rotateY(float angle) {
-	float radians = toRadians(angle);
-	GLdouble matrix[] =
-	{
-		cos(radians), 0, -sin(radians), 0,
-		0, 1, 0, 0,
-		sin(radians), 0, cos(radians), 0,
-		0, 0, 0, 1
-	};
-	glMultMatrixd(matrix);
-	myDisplayCallback();
-}
-
-void rotateZ(float angle) {
-	float radians = toRadians(angle);
-	GLdouble matrix[] =
-	{
-		cos(radians), sin(radians), 0, 0,
-		-sin(radians), cos(radians), 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	};
-	glMultMatrixd(matrix);
-	myDisplayCallback();
-}
-
 void handleKeys(unsigned char key, int cur_x, int cur_y){
+    if(key == 27)
+        CONTROL = false;
+    if(!CONTROL || JUMPING)
+        return;
+
     switch(key){
         case 'd':
             camera.right();
@@ -343,18 +409,46 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
             camera.backward();
 			background_x_pos -= 10;
             break;
+        case ' ':
+            camera.jump();
+            break;
+    }
+}
+
+void handleMouse(int curX, int curY){
+    if(!CONTROL)
+        return;
+    camera.mouseMove(curX, curY);
+}
+
+// MENU GLOBALS
+const int ACTIVATE = 1;
+const int EXIT = 2;
+
+void mainMenu(int id){
+    switch(id){
+        case ACTIVATE:
+            CONTROL = true;
+            break;
+        case EXIT:
+            exit(0);
+    }
+}
+
+void handleSpecial(int key, int mx, int my){
+    switch(key){
+        case GLUT_KEY_END:
+            CONTROL = false;
+            break;
     }
 }
 
 
 //***********************************************************************************
 void myInit()
-{glClearColor(1, 1, 1, 0);			// specify a background color: white 
-//glOrtho(-500, 500, -500, 500, -500, 500);  // specify a viewing area
-//gluPerspective(100, 1, 0, 400);
+{glClearColor(.3, .3, .3, 0);			// specify a background color: white 
 camera.perspective();
 glEnable(GL_DEPTH_TEST);
-//gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
 camera.lookAt();
 }
 
@@ -371,15 +465,22 @@ int  main()
     char *argv[1] = {(char*)"Something"};
     glutInit(&argc, argv);
     //====================================================================//
-	readPixelMap();
+	//readPixelMap();
     glutInitDisplayMode(GLUT_DEPTH);
-    glutInitWindowSize(1800, 1200);				// specify a window size
+    glutInitWindowSize(WIDTH, HEIGHT);				// specify a window size
     glutInitWindowPosition(0, 0);			// specify a window position
     glutCreateWindow("3D Stuff");	// create a titled window
 
     myInit();
 
+    glutCreateMenu(mainMenu);
+    glutAddMenuEntry("Take Control", ACTIVATE);
+    glutAddMenuEntry("Exit", EXIT);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+
     glutKeyboardFunc(handleKeys);
+    glutSpecialFunc(handleSpecial);
+    glutPassiveMotionFunc(handleMouse);
 
     glutDisplayFunc(myDisplayCallback);	// register a callback
     glutMainLoop();							// get into an infinite loop
