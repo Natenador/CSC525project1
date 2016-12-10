@@ -1,17 +1,24 @@
 /*==================================================================================================
- PROGRAMMER:			Nathan Kroll
+ PROGRAMMER:			Nathan Kroll,
+                        Thomas Kroll, kroll001
  COURSE:				CSC 525/625
- MODIFIED BY:			Nathan Kroll
+ MODIFIED BY:			Nathan Kroll,
+                        Thomas Kroll, kroll001
  LAST MODIFIED DATE:	12/5/2016
- DESCRIPTION:			Lab 14: Drawing a 3D triangular pipe, using the correct methods to generate the polygons in the right order every time. Rotating around different axis
+ DESCRIPTION:
  NOTE:					N/A
- FILES:					lab14.cpp, (CSC525Labs.sln)
+ FILES:					project3.cpp, (CSC525Labs.sln)
  IDE/COMPILER:			MicroSoft Visual Studio 2013
+                        Vim/g++
  INSTRUCTION FOR COMPILATION AND EXECUTION:
 	1.		Double click on myCPPproj.sln	to OPEN the project
 	2.		Press Ctrl+F7					to COMPILE
 	3.		Press Ctrl+Shift+B				to BUILD (COMPILE+LINK)
 	4.		Press Ctrl+F5					to EXECUTE
+ LINUX/G++ COMMAND LINE:
+    1.      Open a terminal in the project directory
+    2.      Execute command to COMPILE: g++ -std=c++11 project2.cpp -o PROJECT -lGL -lGLU -lglut
+    3.      Execute command to EXECUTE: ./PROJECT
 ==================================================================================================*/
 #include <cmath>
 #include<string>
@@ -107,7 +114,7 @@ void drawCoordinateSystem() {
 }
 
 float toRadians(float degrees) {
-	return degrees * 3.1459 / 180;
+	return degrees * 3.14159 / 180;
 }
 
 void myDisplayCallback()
@@ -159,48 +166,6 @@ void rotateZ(float angle) {
 	myDisplayCallback();
 }
 
-void rotateMenuCallback(int entryId) {
-	switch (entryId) {
-	case 0:
-		rotateX(45);
-		break;
-	case 1:
-		rotateX(-45);
-		break;
-	case 2:
-		rotateY(45);
-		break;
-	case 3:
-		rotateY(-45);
-		break;
-	case 4:
-		rotateZ(45);
-		break;
-	case 5:
-		rotateZ(-45);
-		break;
-	case 6:
-		glLoadIdentity();
-		gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
-		myDisplayCallback();
-		break;
-	case 7:
-		exit(0);
-	}
-}
-
-void createMenus() {
-	glutCreateMenu(rotateMenuCallback);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
-	glutAddMenuEntry("Rotate around X-axis 45 degrees", 0);
-	glutAddMenuEntry("Rotate around X-axis -45 degrees", 1);
-	glutAddMenuEntry("Rotate around Y-axis 45 degrees", 2);
-	glutAddMenuEntry("Rotate around Y-axis -45 degrees", 3);
-	glutAddMenuEntry("Rotate around Z-axis 45 degrees", 4);
-	glutAddMenuEntry("Rotate around Z-axis -45 degrees", 5);
-	glutAddMenuEntry("Reset", 6);
-	glutAddMenuEntry("Exit", 7);
-}
 
 //***********************************************************************************
 void myInit()
@@ -215,13 +180,20 @@ gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
 //***********************************************************************************
 
 //***********************************************************************************
-void main()
+int  main()
 {
+    //====================================================================//
+    // These lines are only here so I (Thomas) can work on this at home
+    // since the only c++ compiler available to me is g++
+    // (Visual Studio and Linux don't play well together)
+    int argc = 1;
+    char *argv[1] = {(char*)"Something"};
+    glutInit(&argc, argv);
+    //====================================================================//
 	glutInitDisplayMode(GLUT_DEPTH);
 	glutInitWindowSize(400, 400);				// specify a window size
  glutInitWindowPosition(100, 0);			// specify a window position
  glutCreateWindow("3D Stuff");	// create a titled window
- createMenus();
 
  myInit();		
 glutDisplayFunc(myDisplayCallback);	// register a callback
