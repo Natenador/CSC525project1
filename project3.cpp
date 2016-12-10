@@ -57,7 +57,7 @@ class Camera{
 
     public:
         Camera(double view, double r, double n, double f){
-            this->eyeX = -200;
+            this->eyeX = -1000;
             this->eyeY = 25;
             this->eyeZ = 50;
             this->directX = 0;
@@ -133,7 +133,7 @@ void Camera::backward(){
 
 // GLOBALS //
 
-Camera camera = Camera(120, 1, 0.1, 500);
+Camera camera = Camera(120, 1, 0.1, 2000);
 
 // END GLOBALS //
 
@@ -155,6 +155,10 @@ void drawChar(int aChar, bool smallText = false) {
 	else {
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, aChar);
 	}
+}
+
+void draw3dChar(int aChar) {
+	glutStrokeCharacter(GLUT_STROKE_ROMAN, aChar);
 }
 
 void drawRed() {
@@ -231,6 +235,16 @@ void myDisplayCallback()
 
 	drawCoordinateSystem();
 	drawPolygons();
+	glPushMatrix();
+	glTranslatef(0, 1, 0);
+	glRotatef(-90, 0, 1, 0);
+	glRotatef(-90, 0, 0, 1);
+	glTranslated(-900, 0, 0);
+	std::string message = "Minecraft? Hell Yes! Buy it!";
+	for (int i = 0; i < message.size(); i++) {
+		draw3dChar(message[i]);
+	}
+	glPopMatrix();
 
 	glFlush(); // flush out the buffer contents
 }
