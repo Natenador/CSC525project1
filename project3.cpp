@@ -23,8 +23,10 @@
 #include <cmath>
 #include<string>
 #include<iostream>
+#include<fstream>
 #include <GL/glut.h>				// include GLUT library
 //***********************************************************************************
+int background_x_pos = 200;
 void myDisplayCallback();
 //gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
 //gluPerspective(100, 1, 0, 400);
@@ -100,7 +102,7 @@ class Camera{
 void Camera::move(){
     glLoadIdentity();
     this->lookAt();
-    this->debug();
+    //this->debug();
     myDisplayCallback();
 };
 
@@ -134,7 +136,7 @@ void Camera::backward(){
 // GLOBALS //
 
 Camera camera = Camera(120, 1, 0.1, 2000);
-
+GLfloat background[1200][1920][3];
 // END GLOBALS //
 
 GLdouble vertex[6][3] = 
@@ -208,6 +210,7 @@ void drawPolygons()
 
 }
 
+
 void drawCoordinateSystem() {
 	glPointSize(1);		// change point size back to 1
 
@@ -233,6 +236,8 @@ void myDisplayCallback()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
+	glRasterPos3i(background_x_pos, 2000, -2000);
+	glDrawPixels(1920, 1200, GL_RGB, GL_FLOAT, background);
 	drawCoordinateSystem();
 	drawPolygons();
 	glPushMatrix();
@@ -247,6 +252,40 @@ void myDisplayCallback()
 	glPopMatrix();
 
 	glFlush(); // flush out the buffer contents
+}
+
+void readPixelMap(){
+    std::string fname;
+    // TODO:  REMOVE THIS WHEN WE TURN IN THE PROJECT.
+    // replace with correct path to execute on Trace.
+#ifdef _WIN32
+    fname = "C:\\TEMP\\pixel_map_minecraft.txt";
+#else
+    fname = "pixel_map.txt";
+#endif
+    std::fstream fin;
+    fin.open(fname);
+    float r, g, b;
+    int y = 0;
+    int x = 0;
+    if(fin.is_open()){
+		std::cout << "Successfully opened the file. \nNow reading from pixel_map_minecraft.bin may take a few seconds." << std::endl;
+        while(fin >> r){
+            fin >> g;
+            fin >> b;
+            background[y][x][0] = r;
+            background[y][x][1] = g;
+            background[y][x][2] = b;
+            x++;
+            if(x == 1920){
+                x = 0;
+                y++;
+            }
+        }
+    }
+    else
+        std::cout << fname << " was unable to be opened" << std::endl;
+    fin.close();
 }
 
 void rotateX(float angle) {
@@ -298,9 +337,11 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
             break;
         case 'w':
             camera.forward();
+			background_x_pos += 10;
             break;
         case 's':
             camera.backward();
+			background_x_pos -= 10;
             break;
     }
 }
@@ -330,8 +371,9 @@ int  main()
     char *argv[1] = {(char*)"Something"};
     glutInit(&argc, argv);
     //====================================================================//
+	readPixelMap();
     glutInitDisplayMode(GLUT_DEPTH);
-    glutInitWindowSize(700, 600);				// specify a window size
+    glutInitWindowSize(1920, 1200);				// specify a window size
     glutInitWindowPosition(100, 0);			// specify a window position
     glutCreateWindow("3D Stuff");	// create a titled window
 
