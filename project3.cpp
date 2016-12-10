@@ -166,7 +166,7 @@ void Camera::mouseMove(int mx, int my){
 void Camera::jump(){
     JUMPING = true;
     int jump_len = 40;
-    int sleep_time = 1000;
+    int sleep_time = 10;
     for(int i = 0; i < jump_len; i++){
         this->directZ += 2;
         this->eyeZ += 2;
@@ -278,11 +278,10 @@ void Box::draw()
 	//far z-x parallel plane
 	glColor3f(1, .5, .25);
 	glVertex3i(x, y, z);
+	glVertex3i(x + side_len, y, z);
 	glColor3f(0, 1, 0);
 	glVertex3i(x, y, z + side_len);
 	glVertex3i(x + side_len, y, z + side_len);
-	glColor3f(1, .5, .25);
-	glVertex3i(x + side_len, y, z);
 
 
 	glEnd();
