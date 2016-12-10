@@ -100,6 +100,7 @@ class Camera{
         double lookX(){ return this->directX; };
         double lookY(){ return this->directY; };
         double lookZ(){ return this->directZ; };
+        double getEyeX(){ return this->eyeX; };
 
         void perspective(){
             glMatrixMode(GL_PROJECTION);
@@ -358,12 +359,28 @@ void drawMasterWall(){
     }
 }
 
+void drawAimDot(){
+    double x = camera.lookX();
+    double y = camera.lookY();
+    double z = camera.lookZ();
+    double len = 2;
+    glColor3f(1, 0, 0);
+    glBegin(GL_QUADS);
+    glVertex3d(x, y+len, z-len);
+    glVertex3d(x, y-len, z-len);
+    glVertex3d(x, y-len, z+len);
+    glVertex3d(x, y+len, z+len);
+    glPointSize(1);
+    glEnd();
+}
+
 void myDisplayCallback()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
 	drawCoordinateSystem();
     drawMasterWall();
+    drawAimDot();
 
 	glFlush(); // flush out the buffer contents
 }
@@ -403,7 +420,6 @@ void handleClick(int button, int state, int mx, int my){
     int x = (mx - (WIDTH/2));
     int y = (HEIGHT/2) - my;
     if(button == GLUT_LEFT_BUTTON){
-    std::cout << "click" << std::endl;
         for(int i = 0; i < boxes.size(); i++){
             for(int j = 0; j < boxes.at(i).size(); j++){
                 if(boxes.at(i).at(j).exists())
