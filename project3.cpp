@@ -30,8 +30,13 @@
 #include <unistd.h>
 #endif
 
+#include<vector>
 #include <GL/glut.h>				// include GLUT library
 //***********************************************************************************
+using std::cout;
+using std::endl;
+using std::vector;
+using std::string;
 // SCREEN GLOBALS //
 const int WIDTH = 900;
 const int HEIGHT = 700;
@@ -39,8 +44,6 @@ bool CONTROL = false;
 bool JUMPING = false;
 
 void myDisplayCallback();
-//gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
-//gluPerspective(100, 1, 0, 400);
 
 double toRadians(double degrees) {
 	return degrees * 3.14159 / 180;
@@ -186,16 +189,106 @@ Camera camera = Camera(120, 1, 0.1, 2000);
 
 // END GLOBALS //
 
-GLdouble vertex[6][3] = 
+
+class Box
 {
-	{ 60, 55, 40 },
-	{ 60, -50, 40},
-	{ 65, 90, -70},
-	{ 65, 0, -70 },
-	{ -70, 70, 20},
-	{ -70, -20, 20}
+public:
+	Box(int x, int y, int z, int side_len, int id);
+	/*void setVertex(int i, Vertex v);
+	void setVertex(int i, float x, float y, float z);*/
+	int X();
+	int Y();
+	int Z();
+	void setX(int x);
+	void setY(int y);
+	void setZ(int z);
+	void setSideLen(int len);
+	int sideLen();
+	void draw();
+	int Id();
+	void setId(int id);
+private:
+	int id;
+	int x;
+	int y;
+	int z;
+	int side_len;
+	//vector<Vertex> vertices;
 };
 
+int Box::X() { return this->x; }
+int Box::Y() { return this->y; }
+int Box::Z() { return this->z; }
+int Box::sideLen() { return this->side_len; }
+void Box::setX(int x) { this->x = x; }
+void Box::setY(int y) { this->y = y; }
+void Box::setZ(int z) { this->z = z; }
+void Box::setSideLen(int len) { this->side_len = len; }
+
+
+Box::Box(int x, int y, int z, int side_len, int id) 
+{
+	setX(x);
+	setY(y);
+	setZ(z);
+	setSideLen(side_len);
+	setId(id);
+}
+void Box::draw()
+{
+	glBegin(GL_POLYGON);
+	//top z-x parallel plane
+	glColor3f(0, 1, 0);
+	glVertex3i(x, y + side_len, z + side_len);
+	glColor3f(1, .5, .25);
+	glVertex3i(x, y + side_len, z);
+	glVertex3i(x + side_len, y + side_len, z);
+
+	glColor3f(0, 1, 0);
+	glVertex3i(x + side_len, y + side_len, z + side_len);
+
+
+	glColor3f(1, .5, .25);
+	//far z-y parallel plane
+	glVertex3i(x, y, z);
+	glVertex3i(x, y + side_len, z);
+	glColor3f(0, 1, 0);
+	glVertex3i(x, y + side_len, z + side_len);
+	glColor3f(1, .5, .25);
+	glVertex3i(x, y, z + side_len);
+	//far x-y parallel plane
+	glVertex3i(x, y, z);
+	glVertex3i(x, y + side_len, z);
+	glVertex3i(x + side_len, y + side_len, z);
+	glVertex3i(x + side_len, y, z);
+	//near z-y parallel plane
+
+	glColor3f(0, 1, 0);
+	glVertex3i(x + side_len, y, z + side_len);
+	glColor3f(1, .5, .25);
+	glVertex3i(x + side_len, y + side_len, z);
+	glVertex3i(x + side_len, y, z);
+	glColor3f(0, 1, 0);
+	glVertex3i(x + side_len, y + side_len, z + side_len);
+	//near x-y paralled plane
+	glVertex3i(x + side_len, y, z + side_len);
+	glVertex3i(x, y, z + side_len);
+	glVertex3i(x, y + side_len, z + side_len);
+	glVertex3i(x + side_len, y + side_len, z + side_len);
+	//far z-x parallel plane
+	glColor3f(1, .5, .25);
+	glVertex3i(x, y, z);
+	glColor3f(0, 1, 0);
+	glVertex3i(x, y, z + side_len);
+	glVertex3i(x + side_len, y, z + side_len);
+	glColor3f(1, .5, .25);
+	glVertex3i(x + side_len, y, z);
+
+
+	glEnd();
+}
+int Box::Id() { return this->id; }
+void Box::setId(int i) { this->id = id; }
 
 void drawChar(int aChar, bool smallText = false) {
 	if (smallText) {
@@ -204,53 +297,6 @@ void drawChar(int aChar, bool smallText = false) {
 	else {
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, aChar);
 	}
-}
-
-void drawRed() {
-	glPolygonMode(GL_BACK, GL_LINE);
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glFrontFace(GL_CCW);
-	glBegin(GL_POLYGON);
-	glColor3f(1, 0, 0);
-	glVertex3dv(vertex[0]);
-	glVertex3dv(vertex[1]);
-	glVertex3dv(vertex[3]);
-	glVertex3dv(vertex[2]);
-	glEnd();
-}
-
-void drawBlue() {
-	glPolygonMode(GL_BACK, GL_LINE);
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glFrontFace(GL_CCW);
-	glBegin(GL_POLYGON);
-	glColor3f(0, 0, 1);
-	glVertex3dv(vertex[0]);
-	glVertex3dv(vertex[4]);
-	glVertex3dv(vertex[5]);
-	glVertex3dv(vertex[1]);
-	glEnd();
-}
-
-void drawGreen() {
-	glPolygonMode(GL_BACK, GL_LINE);
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glFrontFace(GL_CW);
-	glBegin(GL_POLYGON);
-	glColor3f(0, 1, 0);
-	glVertex3dv(vertex[2]);
-	glVertex3dv(vertex[4]);
-	glVertex3dv(vertex[5]);
-	glVertex3dv(vertex[3]);
-	glEnd();
-
-}
-void drawPolygons() 
-{
-	drawRed();
-	drawGreen();
-	drawBlue();
-
 }
 
 void drawCoordinateSystem() {
@@ -279,7 +325,16 @@ void myDisplayCallback()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
 	drawCoordinateSystem();
-	drawPolygons();
+	/*glEnable(GL_POLYGON_STIPPLE);
+	glPolygonStipple(shield_pattern);*/
+	Box b1(0, 0, 0, 50, 0);
+	b1.draw();
+	Box b(50, 0, 0, 50, 1);
+	b.draw();
+	/*glPushMatrix();
+	glTranslatef(50, 0, 0);
+	glutSolidCube(50);*/
+	/*glPopMatrix();*/
 
 	glFlush(); // flush out the buffer contents
 }
