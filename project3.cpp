@@ -28,8 +28,13 @@
 void myDisplayCallback();
 //gluLookAt(60, 70, 60, 0, 0, 0, 0, 1, 0);
 //gluPerspective(100, 1, 0, 400);
+
 double toRadians(double degrees) {
 	return degrees * 3.14159 / 180;
+}
+
+double toDegrees(double radians){
+    return radians * 180 / 3.14159;
 }
 
 class Camera{
@@ -48,7 +53,7 @@ class Camera{
 
         double movement;
 
-        void moveSide(double dx, double dy);
+        void move();
 
     public:
         Camera(double view, double r, double n, double f){
@@ -90,9 +95,7 @@ class Camera{
         void left();
 };
 
-void Camera::moveSide(double dx, double dy){
-    this->eyeX += dx;
-    this->eyeY += dy;
+void Camera::move(){
     glLoadIdentity();
     this->lookAt();
     this->debug();
@@ -100,13 +103,15 @@ void Camera::moveSide(double dx, double dy){
 };
 
 void Camera::right(){
-    double angle = toRadians(45);
-    this->moveSide(-(this->movement * cos(angle)), (this->movement * sin(angle)));
+    this->eyeY -= this->movement;
+    this->directY -= this->movement;
+    this->move();
 };
 
 void Camera::left(){
-    double angle = toRadians(45);
-    this->moveSide((this->movement * cos(angle)), -(this->movement * sin(angle)));
+    this->eyeY += this->movement;
+    this->directY += this->movement;
+    this->move();
 };
 
 // GLOBALS //
