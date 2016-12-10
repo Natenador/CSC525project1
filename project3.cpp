@@ -253,9 +253,9 @@ void Box::draw()
 	glVertex3i(x, y + side_len, z);
 	glColor3f(0, 1, 0);
 	glVertex3i(x, y + side_len, z + side_len);
-	glColor3f(1, .5, .25);
 	glVertex3i(x, y, z + side_len);
 	//far x-y parallel plane
+	glColor3f(1, .5, .25);
 	glVertex3i(x, y, z);
 	glVertex3i(x, y + side_len, z);
 	glVertex3i(x + side_len, y + side_len, z);
