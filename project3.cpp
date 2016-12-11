@@ -272,7 +272,7 @@ Box::Box(int x, int y, int z, int side_len)
 }
 
 void Box::checkAndRemove(){
-    if(this->y < camera.lookY() && (this->y+this->side_len) > camera.lookY() && this->z < camera.lookZ() && (this->z+this->side_len) > camera.lookZ()){
+    if(this->y <= camera.lookY() && (this->y+this->side_len) > camera.lookY() && this->z <= camera.lookZ() && (this->z+this->side_len) > camera.lookZ()){
         this->remove();
     }
 }
@@ -381,26 +381,6 @@ void draw3dChar(int aChar) {
 	glutStrokeCharacter(GLUT_STROKE_ROMAN, aChar);
 }
 
-void drawCoordinateSystem() {
-	glPointSize(1);		// change point size back to 1
-
-	glBegin(GL_POINTS);	// use points to form X-/Y-axes
-	glColor3f(0, 0, 0);			 // change drawing color to black
-	for (int x = -150; x <= 150; x++) // draw X-axis
-		glVertex3i(x, 0, 0);
-	for (int y = -150; y <= 150; y++) // draw Y-axis
-		glVertex3i(0, y, 0);
-	for (int z = -150; z <= 150; z++) // draw Z-axis
-		glVertex3i(0, 0, z);
-	glEnd();
-	glRasterPos3i(5, 140, 0);
-	drawChar('Y', true);
-	glRasterPos3i(140, 5, 0);
-	drawChar('X', true);
-	glRasterPos3i(10, 0, 140);
-	drawChar('Z', true);
-}
-
 void initBoxes(){
     int width = 35;
     int height = 9;
@@ -465,7 +445,6 @@ void myDisplayCallback()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
-	drawCoordinateSystem();
     drawMasterWall();
     drawAimDot();
 	glColor3f(1, 1, 1);
@@ -515,20 +494,6 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
         case '0':
             checkAndRemoveBlocks();
             break;
-    }
-}
-
-void handleMouse(int curX, int curY){
-    if(!CONTROL)
-        return;
-    //camera.mouseMove(curX, curY);
-}
-
-void handleClick(int button, int state, int mx, int my){
-    int x = (mx - (WIDTH/2));
-    int y = (HEIGHT/2) - my;
-    if(button == GLUT_LEFT_BUTTON){
-        checkAndRemoveBlocks();
     }
 }
 
@@ -602,8 +567,6 @@ int  main()
 
     glutKeyboardFunc(handleKeys);
     glutSpecialFunc(handleSpecial);
-    glutPassiveMotionFunc(handleMouse);
-    glutMouseFunc(handleClick);
 
     initBoxes();
     glutDisplayFunc(myDisplayCallback);	// register a callback
