@@ -84,7 +84,7 @@ class Camera{
     public:
         Camera(double view, double r, double n, double f){
             this->eyeX = -1000;
-            this->eyeY = 25;
+            this->eyeY = 0;
             this->eyeZ = 50;
             this->directX = this->eyeX+100;
             this->directY = 0;
@@ -127,8 +127,13 @@ class Camera{
         void forward();
         void backward();
         void mouseMove(int mx, int my);
+        void lookUp();
+        void lookDown();
+        void lookRight();
+        void lookLeft();
         void jump();
 };
+
 
 void Camera::move(){
     glLoadIdentity();
@@ -136,6 +141,26 @@ void Camera::move(){
     //this->debug();
     myDisplayCallback();
 };
+
+void Camera::lookUp(){
+    this->directZ += this->movement;
+    this->move();
+}
+
+void Camera::lookDown(){
+    this->directZ -= this->movement;
+    this->move();
+}
+
+void Camera::lookRight(){
+    this->directY -= this->movement;
+    this->move();
+}
+
+void Camera::lookLeft(){
+    this->directY += this->movement;
+    this->move();
+}
 
 void Camera::right(){
     this->eyeY -= this->movement;
@@ -345,8 +370,8 @@ void drawCoordinateSystem() {
 }
 
 void initBoxes(){
-    int width = 40;
-    int height = 10;
+    int width = 35;
+    int height = 9;
     int box_len = 50;
     int start_y = -(width*box_len/2);
     int y = start_y;
@@ -392,9 +417,6 @@ void myDisplayCallback()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
-	//glRasterPos3i(500, 2100, -2000);
-	//glDrawPixels(1920, 1200, GL_RGB, GL_FLOAT, background);
-	drawCoordinateSystem();
     drawMasterWall();
     drawAimDot();
 	glPushMatrix();
@@ -446,9 +468,21 @@ void readPixelMap(){
     fin.close();
 }
 
+void checkAndRemoveBlocks(){
+    for(int i = 0; i < boxes.size(); i++){
+        for(int j = 0; j < boxes.at(i).size(); j++){
+            if(boxes.at(i).at(j).exists())
+                boxes.at(i).at(j).checkAndRemove();
+        }
+    }
+    myDisplayCallback();
+}
+
 void handleKeys(unsigned char key, int cur_x, int cur_y){
     if(key == 27)
         CONTROL = false;
+    if(key == 'm')
+        CONTROL = true;
     if(!CONTROL || JUMPING)
         return;
 
@@ -470,26 +504,23 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
         case ' ':
             camera.jump();
             break;
+        case '0':
+            checkAndRemoveBlocks();
+            break;
     }
 }
 
 void handleMouse(int curX, int curY){
     if(!CONTROL)
         return;
-    camera.mouseMove(curX, curY);
+    //camera.mouseMove(curX, curY);
 }
 
 void handleClick(int button, int state, int mx, int my){
     int x = (mx - (WIDTH/2));
     int y = (HEIGHT/2) - my;
     if(button == GLUT_LEFT_BUTTON){
-        for(int i = 0; i < boxes.size(); i++){
-            for(int j = 0; j < boxes.at(i).size(); j++){
-                if(boxes.at(i).at(j).exists())
-                    boxes.at(i).at(j).checkAndRemove();
-            }
-        }
-        myDisplayCallback();
+        checkAndRemoveBlocks();
     }
 }
 
@@ -511,6 +542,18 @@ void handleSpecial(int key, int mx, int my){
     switch(key){
         case GLUT_KEY_END:
             CONTROL = false;
+            break;
+        case GLUT_KEY_UP:
+            camera.lookUp();
+            break;
+        case GLUT_KEY_DOWN:
+            camera.lookDown();
+            break;
+        case GLUT_KEY_RIGHT:
+            camera.lookRight();
+            break;
+        case GLUT_KEY_LEFT:
+            camera.lookLeft();
             break;
     }
 }
