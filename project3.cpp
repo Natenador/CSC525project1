@@ -1,24 +1,53 @@
 /*==================================================================================================
- PROGRAMMER:			Nathan Kroll,
+ PROGRAMMER:			Nathan Kroll, Kroll1483
                         Thomas Kroll, kroll001
  COURSE:				CSC 525/625
- MODIFIED BY:			Nathan Kroll,
+ MODIFIED BY:			Nathan Kroll, Kroll1483
                         Thomas Kroll, kroll001
  LAST MODIFIED DATE:	12/5/2016
- DESCRIPTION:
+ DESCRIPTION:           This program is a 3D interactive advertisement for Minecraft.  There is text
+                        floating in front of and behind a 3D wall.  The user can move around and
+                        interact with the wall by removing blocks.  The goal is to reveal the text
+                        behind the wall to see the full message! The user is restricted from moving
+                        around the wall to force interaction with the blocks.
+                        TO USE:
+                            -Right Click and select "Take Control", or press 'm' to take conrol of
+                            the camera.
+                            -MOVEMENT:
+                                -'w' to move forward.
+                                -'s' to move backward.
+                                -'a' to move left.
+                                -'d' to move right.
+                                -UP_ARROW to look up.
+                                -DOWN_ARROW to look down.
+                                -RIGHT_ARROW to look right.
+                                -LEFT_ARROW to look left.
+                            -LEFT_CLICK or numpad '0' to interact with the block that your
+                                aim-dot is hovering over.
+                            -ESC or END to surrender control of the camera.
+
+                        PROGRAMMER CONTRIBUTION:
+                            Thomas Kroll, kroll001: 50%
+                                -Programmed the Camera class.
+                                -Wrote functions to build the wall.
+                                -Wrote functions/methods to interact with the wall.
+                            Nathan Kroll, : 50%
+                                -Programmed the Block class
+                                -Changed background.
+                                -Built Text for advertisement.
  NOTE:					N/A
  FILES:					project3.cpp, (CSC525Labs.sln)
- IDE/COMPILER:			MicroSoft Visual Studio 2013
-                        Vim/g++
+ IDE/COMPILER:			MicroSoft Visual Studio 2013, Vim/g++
  INSTRUCTION FOR COMPILATION AND EXECUTION:
-	1.		Double click on myCPPproj.sln	to OPEN the project
-	2.		Press Ctrl+F7					to COMPILE
-	3.		Press Ctrl+Shift+B				to BUILD (COMPILE+LINK)
-	4.		Press Ctrl+F5					to EXECUTE
- LINUX/G++ COMMAND LINE:
-    1.      Open a terminal in the project directory
-    2.      Execute command to COMPILE: g++ -std=c++11 project2.cpp -o PROJECT -lGL -lGLU -lglut
-    3.      Execute command to EXECUTE: ./PROJECT
+    WINDOWS/VISUAL STUDIO:
+        1.		Double click on myCPPproj.sln	to OPEN the project
+        2.		Press Ctrl+F7					to COMPILE
+        3.		Press Ctrl+Shift+B				to BUILD (COMPILE+LINK)
+        4.		Press Ctrl+F5					to EXECUTE
+    LINUX/G++ COMMAND LINE:
+        1.      Open a terminal in the project directory
+        2.      Execute command to COMPILE: g++ -std=c++11 project2.cpp -o PROJECT -lGL -lGLU -lglut
+        3.      Execute command to EXECUTE: ./PROJECT
 ==================================================================================================*/
 #include <cmath>
 #include<string>
