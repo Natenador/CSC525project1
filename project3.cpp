@@ -423,13 +423,13 @@ void drawAimDot(){
     glEnd();
 }
 
-void draw3dString(std::string message, int x_depth, int y_depth) {
+void draw3dString(std::string message, int x_depth, int y_depth, int z_depth) {
 	glPushMatrix();
 	glTranslatef(0, 1, 0);
 	glRotatef(-90, 0, 1, 0);
 	glRotatef(-90, 0, 0, 1);
 	glTranslated(y_depth, 0, 0);
-	glTranslated(0, 0, x_depth);
+	glTranslated(0, z_depth, x_depth);
 	for (int i = 0; i < message.size(); i++) {
 		draw3dChar(message[i]);
 	}
@@ -445,10 +445,10 @@ void myDisplayCallback()
     drawAimDot();
 	glColor3f(1, 1, 1);
 	std::string message = "Play Minecraft?";
-	draw3dString(message, 500, -500);
+	draw3dString(message, 500, -500, 100);
 	glColor3f(.3, .3, .3);
 	message = "Awww Yeeaahh! Buy It Now!";
-	draw3dString(message, -300, -750);
+	draw3dString(message, -300, -750, 50);
 
 	glFlush(); // flush out the buffer contents
 }
