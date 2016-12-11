@@ -1,8 +1,8 @@
 /*==================================================================================================
- PROGRAMMER:			Nathan Kroll,
+ PROGRAMMER:			Nathan Kroll, Kroll1483
                         Thomas Kroll, kroll001
  COURSE:				CSC 525/625
- MODIFIED BY:			Nathan Kroll,
+ MODIFIED BY:			Nathan Kroll, Kroll1483
                         Thomas Kroll, kroll001
  LAST MODIFIED DATE:	12/5/2016
  DESCRIPTION:           This program is a 3D interactive advertisement for Minecraft.  There is text
