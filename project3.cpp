@@ -244,11 +244,11 @@ void Camera::jump(){
 }
 
 void green() {
-	glColor3f(0, .6, 0);
+	glColor3f(0, .7, 0);
 }
 
 void brown() {
-	glColor3f(.7, .5, .3);
+	glColor3f(.8, .55, .45);
 }
 
 // GLOBALS //
@@ -270,7 +270,7 @@ public:
 	void setZ(int z);
 	void setSideLen(int len);
 	int sideLen();
-	void draw();
+	void draw(bool grass);
 	void remove(){ this->render = false; };
 	bool exists(){ return this->render; };
 	void checkAndRemove();
@@ -301,67 +301,99 @@ Box::Box(int x, int y, int z, int side_len)
 }
 
 void Box::checkAndRemove(){
-    if(this->y < camera.lookY() && (this->y+this->side_len) > camera.lookY() && this->z < camera.lookZ() && (this->z+this->side_len) > camera.lookZ()){
+    if(this->y <= camera.lookY() && (this->y+this->side_len) > camera.lookY() && this->z <= camera.lookZ() && (this->z+this->side_len) > camera.lookZ()){
         this->remove();
     }
 }
 
-void Box::draw()
+void Box::draw(bool grass)
 {
 	glBegin(GL_POLYGON);
-	//top z-x parallel plane
-	green();
-	glVertex3i(x, y + side_len, z + side_len);
-	brown();
-	glVertex3i(x, y + side_len, z);
-	glVertex3i(x + side_len, y + side_len, z);
+	if (grass) {
+		//top z-x parallel plane
+		green();
+		glVertex3i(x, y + side_len, z + side_len);
+		brown();
+		glVertex3i(x, y + side_len, z);
+		glVertex3i(x + side_len, y + side_len, z);
 
-	green();
-	glVertex3i(x + side_len, y + side_len, z + side_len);
+		green();
+		glVertex3i(x + side_len, y + side_len, z + side_len);
 
 
-	brown();
-	//far z-y parallel plane
-	glVertex3i(x, y, z);
-	glVertex3i(x, y + side_len, z);
-	green();
-	glVertex3i(x, y + side_len, z + side_len);
-	glVertex3i(x, y, z + side_len);
-	//far x-y parallel plane
-	brown();
-	glVertex3i(x, y, z);
-	glVertex3i(x, y + side_len, z);
-	glVertex3i(x + side_len, y + side_len, z);
-	glVertex3i(x + side_len, y, z);
-	//near z-y parallel plane
+		brown();
+		//far z-y parallel plane
+		glVertex3i(x, y, z);
+		glVertex3i(x, y + side_len, z);
+		green();
+		glVertex3i(x, y + side_len, z + side_len);
+		glVertex3i(x, y, z + side_len);
+		//far x-y parallel plane
+		brown();
+		glVertex3i(x, y, z);
+		glVertex3i(x, y + side_len, z);
+		glVertex3i(x + side_len, y + side_len, z);
+		glVertex3i(x + side_len, y, z);
+		//near z-y parallel plane
 
-	green();
-	glVertex3i(x + side_len, y, z + side_len);
-	brown();
-	glVertex3i(x + side_len, y + side_len, z);
-	glVertex3i(x + side_len, y, z);
-	green();
-	glVertex3i(x + side_len, y + side_len, z + side_len);
-	//near x-y paralled plane
-	glVertex3i(x + side_len, y, z + side_len);
-	glVertex3i(x, y, z + side_len);
-	glVertex3i(x, y + side_len, z + side_len);
-	glVertex3i(x + side_len, y + side_len, z + side_len);
-	//far z-x parallel plane
-	brown();
-	glVertex3i(x, y, z);
-	glVertex3i(x + side_len, y, z);
-	green();
-	glVertex3i(x, y, z + side_len);
-	glVertex3i(x + side_len, y, z + side_len);
-
+		green();
+		glVertex3i(x + side_len, y, z + side_len);
+		brown();
+		glVertex3i(x + side_len, y + side_len, z);
+		glVertex3i(x + side_len, y, z);
+		green();
+		glVertex3i(x + side_len, y + side_len, z + side_len);
+		//near x-y paralled plane
+		glVertex3i(x + side_len, y, z + side_len);
+		glVertex3i(x, y, z + side_len);
+		glVertex3i(x, y + side_len, z + side_len);
+		glVertex3i(x + side_len, y + side_len, z + side_len);
+		//far z-x parallel plane
+		brown();
+		glVertex3i(x, y, z);
+		glVertex3i(x + side_len, y, z);
+		green();
+		glVertex3i(x, y, z + side_len);
+		glVertex3i(x + side_len, y, z + side_len);
+	}
+	else
+	{
+		//top z-x parallel plane
+		brown();
+		glVertex3i(x, y + side_len, z + side_len);
+		glVertex3i(x, y + side_len, z);
+		glVertex3i(x + side_len, y + side_len, z);
+		glVertex3i(x + side_len, y + side_len, z + side_len);
+		//far z-y parallel plane
+		glVertex3i(x, y, z);
+		glVertex3i(x, y + side_len, z);
+		glVertex3i(x, y + side_len, z + side_len);
+		glVertex3i(x, y, z + side_len);
+		//far x-y parallel plane
+		glVertex3i(x, y, z);
+		glVertex3i(x, y + side_len, z);
+		glVertex3i(x + side_len, y + side_len, z);
+		glVertex3i(x + side_len, y, z);
+		//near z-y parallel plane
+		glVertex3i(x + side_len, y, z + side_len);
+		glVertex3i(x + side_len, y + side_len, z);
+		glVertex3i(x + side_len, y, z);
+		glVertex3i(x + side_len, y + side_len, z + side_len);
+		//near x-y paralled plane
+		glVertex3i(x + side_len, y, z + side_len);
+		glVertex3i(x, y, z + side_len);
+		glVertex3i(x, y + side_len, z + side_len);
+		glVertex3i(x + side_len, y + side_len, z + side_len);
+		//far z-x parallel plane
+		glVertex3i(x, y, z);
+		glVertex3i(x + side_len, y, z);
+		glVertex3i(x, y, z + side_len);
+		glVertex3i(x + side_len, y, z + side_len);
+	}
 
 	glEnd();
 }
 
-
-GLfloat background[1200][1920][3];
-int background_x_pos = 200;
 vector<vector<Box>> boxes;
 
 void drawChar(int aChar, bool smallText = false) {
@@ -376,26 +408,6 @@ void drawChar(int aChar, bool smallText = false) {
 
 void draw3dChar(int aChar) {
 	glutStrokeCharacter(GLUT_STROKE_ROMAN, aChar);
-}
-
-void drawCoordinateSystem() {
-	glPointSize(1);		// change point size back to 1
-
-	glBegin(GL_POINTS);	// use points to form X-/Y-axes
-	glColor3f(0, 0, 0);			 // change drawing color to black
-	for (int x = -150; x <= 150; x++) // draw X-axis
-		glVertex3i(x, 0, 0);
-	for (int y = -150; y <= 150; y++) // draw Y-axis
-		glVertex3i(0, y, 0);
-	for (int z = -150; z <= 150; z++) // draw Z-axis
-		glVertex3i(0, 0, z);
-	glEnd();
-	glRasterPos3i(5, 140, 0);
-	drawChar('Y', true);
-	glRasterPos3i(140, 5, 0);
-	drawChar('X', true);
-	glRasterPos3i(10, 0, 140);
-	drawChar('Z', true);
 }
 
 void initBoxes(){
@@ -422,7 +434,10 @@ void drawMasterWall(){
     for(int i = 0; i < boxes.size(); i++){
         for(int j = 0; j < boxes.at(i).size(); j++){
             if(boxes.at(i).at(j).exists())
-                boxes.at(i).at(j).draw();
+				if(i < boxes.size() - 1)
+					boxes.at(i).at(j).draw(false);
+				else
+					boxes.at(i).at(j).draw(true);
         }
     }
 }
@@ -442,59 +457,33 @@ void drawAimDot(){
     glEnd();
 }
 
+void draw3dString(std::string message, int x_depth, int y_depth, int z_depth) {
+	glPushMatrix();
+	glTranslatef(0, 1, 0);
+	glRotatef(-90, 0, 1, 0);
+	glRotatef(-90, 0, 0, 1);
+	glTranslated(y_depth, 0, 0);
+	glTranslated(0, z_depth, x_depth);
+	for (int i = 0; i < message.size(); i++) {
+		draw3dChar(message[i]);
+	}
+	glPopMatrix();
+}
+
 void myDisplayCallback()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// draw the background
 
     drawMasterWall();
     drawAimDot();
-	glPushMatrix();
-	glTranslatef(0, 1, 0);
-	glRotatef(-90, 0, 1, 0);
-	glRotatef(-90, 0, 0, 1);
-	glTranslated(-900, 0, 0);
-	glTranslated(0, 0, -100);
-	std::string message = "Minecraft? Hell Yes! Buy it!";
-	for (int i = 0; i < message.size(); i++) {
-		draw3dChar(message[i]);
-	}
-	glPopMatrix();
+	glColor3f(1, 1, 1);
+	std::string message = "Play Minecraft?";
+	draw3dString(message, 500, -500, 100);
+	glColor3f(.3, .3, .3);
+	message = "Awww Yeeaahh! Buy It Now!";
+	draw3dString(message, -300, -750, 50);
 
 	glFlush(); // flush out the buffer contents
-}
-
-void readPixelMap(){
-    std::string fname;
-    // TODO:  REMOVE THIS WHEN WE TURN IN THE PROJECT.
-    // replace with correct path to execute on Trace.
-#ifdef _WIN32
-    fname = "C:\\src\\Git_Repos\\CSC525project3\\CSC525project3\\pixel_map_minecraft.txt";
-#else
-    fname = "pixel_map.txt";
-#endif
-    std::fstream fin;
-    fin.open(fname);
-    float r, g, b;
-    int y = 0;
-    int x = 0;
-    if(fin.is_open()){
-		std::cout << "Successfully opened the file. \nNow reading from pixel_map_minecraft.bin may take a few seconds." << std::endl;
-        while(fin >> r){
-            fin >> g;
-            fin >> b;
-            background[y][x][0] = r;
-            background[y][x][1] = g;
-            background[y][x][2] = b;
-            x++;
-            if(x == 1920){
-                x = 0;
-                y++;
-            }
-        }
-    }
-    else
-        std::cout << fname << " was unable to be opened" << std::endl;
-    fin.close();
 }
 
 void checkAndRemoveBlocks(){
@@ -524,11 +513,9 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
             break;
         case 'w':
             camera.forward();
-			background_x_pos += 10;
             break;
         case 's':
             camera.backward();
-			background_x_pos -= 10;
             break;
         case ' ':
             camera.jump();
@@ -536,20 +523,6 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
         case '0':
             checkAndRemoveBlocks();
             break;
-    }
-}
-
-void handleMouse(int curX, int curY){
-    if(!CONTROL)
-        return;
-    //camera.mouseMove(curX, curY);
-}
-
-void handleClick(int button, int state, int mx, int my){
-    int x = (mx - (WIDTH/2));
-    int y = (HEIGHT/2) - my;
-    if(button == GLUT_LEFT_BUTTON){
-        checkAndRemoveBlocks();
     }
 }
 
@@ -590,7 +563,7 @@ void handleSpecial(int key, int mx, int my){
 
 //***********************************************************************************
 void myInit()
-{glClearColor(.3, .3, .3, 0);			// specify a background color: white 
+{glClearColor(0, .75, 1, 0);			// specify a background color: white 
 camera.perspective();
 glEnable(GL_DEPTH_TEST);
 camera.lookAt();
@@ -609,7 +582,6 @@ int  main()
     char *argv[1] = {(char*)"Something"};
     glutInit(&argc, argv);
     //====================================================================//
-	//readPixelMap();
     glutInitDisplayMode(GLUT_DEPTH);
     glutInitWindowSize(WIDTH, HEIGHT);				// specify a window size
     glutInitWindowPosition(0, 0);			// specify a window position
@@ -624,8 +596,6 @@ int  main()
 
     glutKeyboardFunc(handleKeys);
     glutSpecialFunc(handleSpecial);
-    glutPassiveMotionFunc(handleMouse);
-    glutMouseFunc(handleClick);
 
     initBoxes();
     glutDisplayFunc(myDisplayCallback);	// register a callback
