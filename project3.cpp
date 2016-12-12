@@ -35,6 +35,7 @@
                                 -Programmed the Block class
                                 -Changed background.
                                 -Built Text for advertisement.
+								-Created help window
  NOTE:					N/A
  FILES:					project3.cpp, (CSC525Labs.sln)
  IDE/COMPILER:			MicroSoft Visual Studio 2013, Vim/g++
@@ -529,12 +530,74 @@ void handleKeys(unsigned char key, int cur_x, int cur_y){
 // MENU GLOBALS
 const int ACTIVATE = 1;
 const int EXIT = 2;
+const int HELP = 3;
+int help_window_id;
+
+
+void drawText(std::string text) {
+	for (int i = 0; i < text.length(); i++) {
+		drawChar(text[i]);
+	}
+}
+
+void helpWindowCallback() {
+	int min_x = -400;
+	int y_diff = 25;
+	int y = 375;
+	glClear(GL_COLOR_BUFFER_BIT);
+	glPointSize(5);
+	glColor3f(.5, .5, 0);
+	std::vector<std::string> help_messages;
+	help_messages.push_back("How to use:");
+	help_messages.push_back("Use menu by right clicking, or press 'm' to start moving around.");
+	help_messages.push_back("How to move:");
+	help_messages.push_back("-'w' to move forward.");
+	help_messages.push_back("- 's' to move backward.");
+	help_messages.push_back("- 'a' to move left.");
+	help_messages.push_back("- 'd' to move right.");
+	help_messages.push_back("- UP_ARROW to look up.");
+	help_messages.push_back("- DOWN_ARROW to look down.");
+	help_messages.push_back("- RIGHT_ARROW to look right.");
+	help_messages.push_back("- LEFT_ARROW to look left.");
+	help_messages.push_back("- Numpad '0' to interact with the block that your aim - dot is hovering over.");
+	help_messages.push_back("- ESC or END to surrender control of the camera.");
+	for (int i = 0; i < help_messages.size() - 1; i++) {
+		glRasterPos2i(min_x, y);
+		drawText(help_messages.at(i));
+		y -= y_diff;
+	}
+	glFlush();
+}
+
+void helpMenu(int entryId) {
+	switch (entryId) {
+	case 0:
+		glutIconifyWindow();
+		break;
+	}
+}
+
+void displayHelpWindow() {
+	glutInitWindowSize(800, 800);
+	glutInitWindowPosition(100, 100);
+	help_window_id = glutCreateWindow("Help Menu");
+	glutCreateMenu(helpMenu);
+	glutAddMenuEntry("Hide", 0);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+	glClearColor(1, 1, 1, 0);
+	gluOrtho2D(-400, 400, -400, 400);
+	glutDisplayFunc(helpWindowCallback);
+}
 
 void mainMenu(int id){
     switch(id){
         case ACTIVATE:
             CONTROL = true;
             break;
+		case HELP:
+			glutSetWindow(help_window_id);
+			glutShowWindow();
+			break;
         case EXIT:
             exit(0);
     }
@@ -559,6 +622,7 @@ void handleSpecial(int key, int mx, int my){
             break;
     }
 }
+
 
 
 //***********************************************************************************
@@ -591,6 +655,7 @@ int  main()
 
     glutCreateMenu(mainMenu);
     glutAddMenuEntry("Take Control", ACTIVATE);
+	glutAddMenuEntry("Help Window", HELP);
     glutAddMenuEntry("Exit", EXIT);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -599,5 +664,6 @@ int  main()
 
     initBoxes();
     glutDisplayFunc(myDisplayCallback);	// register a callback
+	displayHelpWindow();
     glutMainLoop();							// get into an infinite loop
 }
